@@ -2,13 +2,13 @@
  * JSON Feed 1.1 for /updates — consumed by OpenClaw alongside the RSS feed.
  */
 import type { APIContext } from 'astro';
-import { publishedUpdates, site as siteMeta } from '../data/mock';
+import { publishedUpdates, getSite } from '../lib/directus';
 
 const truncate = (s: string, n = 500) => (s.length <= n ? s : s.slice(0, n - 1).trimEnd() + '…');
 
 export async function GET({ site }: APIContext) {
   const base = (site?.toString() || 'https://avalia.rocks').replace(/\/$/, '');
-  const items = publishedUpdates();
+  const [items, siteMeta] = await Promise.all([publishedUpdates(), getSite()]);
 
   const feed = {
     version: 'https://jsonfeed.org/version/1.1',
@@ -25,7 +25,7 @@ export async function GET({ site }: APIContext) {
       content_html: u.content,
       date_published: new Date(u.publicatiedatum).toISOString(),
       tags: u.tags,
-      ...(u.afbeelding ? { image: `${base}${u.afbeelding}` } : {})
+      ...(u.afbeelding ? { image: u.afbeelding } : {})
     }))
   };
 

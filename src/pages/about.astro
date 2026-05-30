@@ -5,7 +5,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Accordion from '../components/Accordion.astro';
-import { site, faq } from '../data/mock';
+import { getSite, getFaq } from '../lib/directus';
+
+const [site, faq] = await Promise.all([getSite(), getFaq()]);
 ---
 <BaseLayout title="About — Avalia" active="about">
 

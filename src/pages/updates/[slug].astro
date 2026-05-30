@@ -6,19 +6,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Badge from '../../components/Badge.astro';
 import Button from '../../components/Button.astro';
-import { updates, updateBySlug, adjacentUpdates } from '../../data/mock';
+import { publishedUpdates, updateBySlug, adjacentUpdates } from '../../lib/directus';
 
 export async function getStaticPaths() {
-  return updates
-    .filter((u) => u.status === 'published')
-    .map((u) => ({ params: { slug: u.slug } }));
+  const all = await publishedUpdates();
+  return all.map((u) => ({ params: { slug: u.slug } }));
 }
 
 const { slug } = Astro.params;
-const update = updateBySlug(slug!);
+const update = await updateBySlug(slug!);
 if (!update) return Astro.redirect('/404');
 
-const { prev, next } = adjacentUpdates(slug!);
+const { prev, next } = await adjacentUpdates(slug!);
 const pubDate = new Date(update.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <BaseLayout title={`${update.titel} — Avalia`} active="updates">

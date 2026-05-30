@@ -5,9 +5,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import UpdateCard from '../../components/UpdateCard.astro';
-import { publishedUpdates } from '../../data/mock';
+import { publishedUpdates } from '../../lib/directus';
 
-const items = publishedUpdates();
+const items = await publishedUpdates();
 ---
 <BaseLayout title="Updates — Avalia" active="updates">
 

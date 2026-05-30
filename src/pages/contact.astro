@@ -10,7 +10,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Field from '../components/Field.astro';
 import Button from '../components/Button.astro';
-import { site } from '../data/mock';
+import { getSite } from '../lib/directus';
+
+const site = await getSite();
 ---
 <BaseLayout title="Contact — Avalia" active="contact">
 

@@ -1,7 +1,7 @@
 ---
 /**
  * Homepage — composed per the blueprint wireframe.
- * Data comes from src/data/mock.ts; swap to Directus by replacing the imports.
+ * Data comes from Directus (src/lib/directus.ts).
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
@@ -9,11 +9,14 @@ import PromoCard from '../components/PromoCard.astro';
 import TopTask from '../components/TopTask.astro';
 import ProductCard from '../components/ProductCard.astro';
 import UpdateCard from '../components/UpdateCard.astro';
-import { activePromo, featuredProducts, publishedUpdates } from '../data/mock';
+import { activePromo, featuredProducts, publishedUpdates } from '../lib/directus';
 
-const hero = activePromo();
-const featured = featuredProducts();
-const latest = publishedUpdates().slice(0, 2);
+const [hero, featured, updates] = await Promise.all([
+  activePromo(),
+  featuredProducts(),
+  publishedUpdates()
+]);
+const latest = updates.slice(0, 2);
 ---
 <BaseLayout title="Avalia — Second Life Digital Fashion" active="home">
 

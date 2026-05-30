@@ -3,7 +3,7 @@
  * Static endpoint, regenerated at build time.
  */
 import type { APIContext } from 'astro';
-import { publishedUpdates, site as siteMeta } from '../data/mock';
+import { publishedUpdates, getSite } from '../lib/directus';
 
 const escape = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -14,7 +14,7 @@ const truncate = (s: string, n = 500) => (s.length <= n ? s : s.slice(0, n - 1).
 
 export async function GET({ site }: APIContext) {
   const base = (site?.toString() || 'https://avalia.rocks').replace(/\/$/, '');
-  const items = publishedUpdates();
+  const [items, siteMeta] = await Promise.all([publishedUpdates(), getSite()]);
   const lastBuild = items[0]?.publicatiedatum
     ? new Date(items[0].publicatiedatum).toUTCString()
     : new Date(0).toUTCString();
@@ -26,7 +26,7 @@ export async function GET({ site }: APIContext) {
       <guid isPermaLink="true">${base}/updates/${u.slug}</guid>
       <pubDate>${new Date(u.publicatiedatum).toUTCString()}</pubDate>
       <description>${cdata(truncate(u.excerpt))}</description>
-      ${u.afbeelding ? `<enclosure url="${base}${u.afbeelding}" type="image/jpeg" />` : ''}
+      ${u.afbeelding ? `<enclosure url="${u.afbeelding}" type="image/jpeg" />` : ''}
       ${u.tags.map((t) => `<category>${escape(t)}</category>`).join('')}
     </item>`).join('');
 

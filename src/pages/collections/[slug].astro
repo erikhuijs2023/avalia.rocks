@@ -8,17 +8,19 @@ import Section from '../../components/Section.astro';
 import PromoCard from '../../components/PromoCard.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import Button from '../../components/Button.astro';
-import { categorieen, productsByCategory } from '../../data/mock';
+import { getCategorieen, productsByCategory } from '../../lib/directus';
 
 export async function getStaticPaths() {
-  return categorieen.map((c) => ({ params: { slug: c.slug } }));
+  const cats = await getCategorieen();
+  return cats.map((c) => ({ params: { slug: c.slug } }));
 }
 
 const { slug } = Astro.params;
+const categorieen = await getCategorieen();
 const category = categorieen.find((c) => c.slug === slug);
 if (!category) return Astro.redirect('/404');
 
-const items = productsByCategory(slug!);
+const items = await productsByCategory(slug!);
 
 const intros: Record<string, string> = {
   wearables: 'Mesh-rigged latex pieces — harnesses, bodysuits, and statement layers — built for the major mesh bodies.',

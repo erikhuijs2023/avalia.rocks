@@ -8,15 +8,17 @@ import Section from '../../components/Section.astro';
 import PromoCard from '../../components/PromoCard.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import Button from '../../components/Button.astro';
-import { promos, producten } from '../../data/mock';
+import { getPromos, getProducten } from '../../lib/directus';
 
 export async function getStaticPaths() {
+  const promos = await getPromos();
   return promos
     .filter((p) => p.cta_url.startsWith('/promo/'))
     .map((p) => ({ params: { slug: p.cta_url.replace('/promo/', '') } }));
 }
 
 const { slug } = Astro.params;
+const [promos, producten] = await Promise.all([getPromos(), getProducten()]);
 const promo = promos.find((p) => p.cta_url === `/promo/${slug}`);
 if (!promo) return Astro.redirect('/404');
 

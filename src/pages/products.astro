@@ -7,13 +7,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import ProductCard from '../components/ProductCard.astro';
 import CategoryFilter from '../components/CategoryFilter.astro';
-import { producten, categorieen } from '../data/mock';
+import { getProducten, getCategorieen } from '../lib/directus';
 
+const [allProducten, categorieen] = await Promise.all([getProducten(), getCategorieen()]);
 const filterOptions = [
   { label: 'All', value: 'all' },
   ...categorieen.map((c) => ({ label: c.naam, value: c.slug }))
 ];
-const published = producten.filter((p) => p.status === 'published');
+const published = allProducten.filter((p) => p.status === 'published');
 ---
 <BaseLayout title="Products — Avalia" active="products">
 
