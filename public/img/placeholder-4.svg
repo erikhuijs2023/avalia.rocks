@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080a18"/>
+      <stop offset=".5" stop-color="#150a3a"/>
+      <stop offset="1" stop-color="#2a124a"/>
+    </linearGradient>
+    <radialGradient id="glow4" cx=".5" cy=".2" r=".6">
+      <stop offset="0" stop-color="#8844ee" stop-opacity=".5"/>
+      <stop offset=".5" stop-color="#5544dd" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#ee44aa" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#g4)"/>
+  <circle cx="400" cy="160" r="380" fill="url(#glow4)"/>
+  <text x="400" y="420" text-anchor="middle" font-family="serif" font-style="italic" font-size="84" fill="#e0e0e8" opacity=".55">Avalia</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#050508"/>
+      <stop offset=".4" stop-color="#0a0e22"/>
+      <stop offset="1" stop-color="#2a0a3a"/>
+    </linearGradient>
+    <radialGradient id="heroGlow" cx=".68" cy=".48" r=".5">
+      <stop offset="0" stop-color="#ee44aa" stop-opacity=".55"/>
+      <stop offset=".4" stop-color="#8844ee" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#4466ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heroGlow2" cx=".2" cy=".7" r=".45">
+      <stop offset="0" stop-color="#4466ff" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#4466ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#heroBg)"/>
+  <circle cx="1300" cy="520" r="600" fill="url(#heroGlow)"/>
+  <circle cx="380" cy="760" r="500" fill="url(#heroGlow2)"/>
+  <circle cx="1300" cy="520" r="240" fill="none" stroke="#ee44aa" stroke-width="2" opacity=".35"/>
+  <circle cx="1300" cy="520" r="320" fill="none" stroke="#8844ee" stroke-width="1" opacity=".25"/>
+</svg>

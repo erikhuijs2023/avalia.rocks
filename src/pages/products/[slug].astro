@@ -1,0 +1,93 @@
+---
+/**
+ * /products/[slug] — product detail page.
+ * Static paths generated from mock data; switch to Directus by replacing the
+ * `getStaticPaths` body with a fetch from `getItems('producten', ...)`.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Badge from '../../components/Badge.astro';
+import Button from '../../components/Button.astro';
+import Gallery from '../../components/Gallery.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { producten, productBySlug, relatedProducts } from '../../data/mock';
+
+export async function getStaticPaths() {
+  return producten
+    .filter((p) => p.status === 'published')
+    .map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const product = productBySlug(slug!);
+if (!product) return Astro.redirect('/404');
+
+const related = relatedProducts(product);
+const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<BaseLayout title={`${product.naam} — Avalia`} active="products">
+
+  <Section>
+    <div class="av-grid av-grid-2" style="align-items:start">
+
+      <div>
+        <Gallery images={product.afbeeldingen} name={product.slug} />
+      </div>
+
+      <div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <Badge variant="category">{product.categorie.naam}</Badge>
+          {product.is_nieuw && <Badge variant="new" />}
+        </div>
+
+        <h1 style="margin:18px 0 6px">{product.naam}</h1>
+        <p style="color:var(--text-secondary);margin-top:0">Released {pubDate}</p>
+
+        <div style="margin:18px 0;color:var(--text-primary);line-height:1.7" set:html={product.uitgebreide_beschrijving}></div>
+
+        {product.features?.length > 0 && (
+          <>
+            <h3 style="margin:32px 0 8px;font-size:18px">Features</h3>
+            <ul style="padding-left:18px;color:var(--text-primary);line-height:1.8;margin:0">
+              {product.features.map((f) => <li>{f}</li>)}
+            </ul>
+          </>
+        )}
+
+        {product.compatibiliteit?.length > 0 && (
+          <>
+            <h3 style="margin:32px 0 8px;font-size:18px">Compatibility</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              {product.compatibiliteit.map((c) => <Badge variant="category">{c}</Badge>)}
+            </div>
+          </>
+        )}
+
+        <div style="margin-top:36px">
+          <Button variant="primary" size="lg" href={product.marketplace_url} external>
+            View on SL Marketplace
+          </Button>
+        </div>
+      </div>
+
+    </div>
+  </Section>
+
+  {related.length > 0 && (
+    <Section eyebrow="More" title="Related products" reveal>
+      <div class="av-grid av-grid-3">
+        {related.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    </Section>
+  )}
+
+</BaseLayout>

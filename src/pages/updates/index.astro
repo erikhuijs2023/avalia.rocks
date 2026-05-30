@@ -1,0 +1,34 @@
+---
+/**
+ * /updates — chronological list of all published updates.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import UpdateCard from '../../components/UpdateCard.astro';
+import { publishedUpdates } from '../../data/mock';
+
+const items = publishedUpdates();
+---
+<BaseLayout title="Updates — Avalia" active="updates">
+
+  <Section eyebrow="News" title="Updates">
+    <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">
+      Drops, fixes, and behind-the-scenes notes. Also syndicated automatically to
+      <a href="/feed.xml" style="color:var(--text-primary)">RSS</a> and
+      <a href="/feed.json" style="color:var(--text-primary)">JSON Feed</a>.
+    </p>
+
+    <div class="av-grid av-grid-2" style="margin-top:32px">
+      {items.map((u) => (
+        <UpdateCard
+          title={u.titel}
+          href={`/updates/${u.slug}`}
+          date={u.publicatiedatum}
+          excerpt={u.excerpt}
+          image={u.afbeelding}
+        />
+      ))}
+    </div>
+  </Section>
+
+</BaseLayout>

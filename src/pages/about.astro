@@ -1,0 +1,24 @@
+---
+/**
+ * /about — brand story + FAQ accordion.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Accordion from '../components/Accordion.astro';
+import { site, faq } from '../data/mock';
+---
+<BaseLayout title="About — Avalia" active="about">
+
+  <Section eyebrow="About" title="The studio">
+    <div style="max-width:680px;color:var(--text-primary);line-height:1.8;font-size:17px"
+         set:html={site.over_tekst}>
+    </div>
+  </Section>
+
+  <Section eyebrow="FAQ" title="Frequently asked">
+    <div style="max-width:760px">
+      <Accordion single items={faq} />
+    </div>
+  </Section>
+
+</BaseLayout>

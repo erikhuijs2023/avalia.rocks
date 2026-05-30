@@ -1,0 +1,65 @@
+---
+/**
+ * /collections/[slug] — product-line landing page.
+ * Slug = category slug. Hero + intro + filtered product grid.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PromoCard from '../../components/PromoCard.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Button from '../../components/Button.astro';
+import { categorieen, productsByCategory } from '../../data/mock';
+
+export async function getStaticPaths() {
+  return categorieen.map((c) => ({ params: { slug: c.slug } }));
+}
+
+const { slug } = Astro.params;
+const category = categorieen.find((c) => c.slug === slug);
+if (!category) return Astro.redirect('/404');
+
+const items = productsByCategory(slug!);
+
+const intros: Record<string, string> = {
+  wearables: 'Mesh-rigged latex pieces — harnesses, bodysuits, and statement layers — built for the major mesh bodies.',
+  huds: 'Color HUDs, showroom HUDs, and creator tools. Small, fast, and friendly to use.',
+  accessories: 'Collars, cuffs, chokers — the finishing touches that turn an outfit into a look.',
+  'mesh-bodies': 'Latex appliers and emissive overlays for the bodies you already wear.'
+};
+const intro = intros[slug!] || `Explore the ${category.naam.toLowerCase()} collection.`;
+---
+<BaseLayout title={`${category.naam} — Avalia`} active="products">
+
+  <PromoCard
+    title={category.naam}
+    description={intro}
+    image="/img/hero-eclipse.svg"
+    minHeight="48vh"
+  />
+
+  <Section eyebrow="Collection" title={`${category.naam} (${items.length})`} viewAllHref="/products" viewAllLabel="← All products">
+    {items.length > 0 ? (
+      <div class="av-grid av-grid-3">
+        {items.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    ) : (
+      <p style="color:var(--text-secondary)">Nothing in this category yet — check back soon.</p>
+    )}
+  </Section>
+
+  <Section tight>
+    <div style="text-align:center">
+      <Button variant="secondary" size="lg" href="/contact">Ask about custom work</Button>
+    </div>
+  </Section>
+
+</BaseLayout>

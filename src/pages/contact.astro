@@ -1,0 +1,56 @@
+---
+/**
+ * /contact — contact form.
+ *
+ * For now the submit handler is client-side only and just shows a success toast
+ * + logs to console. To actually send mail, add an SSR adapter (e.g. node) to
+ * astro.config and create src/pages/api/contact.ts that POSTs via Resend/SMTP.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Field from '../components/Field.astro';
+import Button from '../components/Button.astro';
+import { site } from '../data/mock';
+---
+<BaseLayout title="Contact — Avalia" active="contact">
+
+  <Section eyebrow="Contact" title="Get in touch">
+    <div style="max-width:560px">
+      <p style="color:var(--text-secondary);margin-top:-12px">
+        Questions, collaborations, or support — drop a line and I'll get back within 48 hours.
+        Prefer email? <a href={`mailto:${site.contact_email}`} style="color:var(--text-primary)">{site.contact_email}</a>
+      </p>
+
+      <form id="contact-form" style="display:flex;flex-direction:column;gap:18px;margin-top:32px" novalidate>
+        <Field label="Name" name="name" placeholder="Your SL name or real name" required />
+        <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
+        <Field label="Subject" name="subject" as="select"
+               options={['General', 'Collaboration', 'Support', 'Other']} />
+        <Field label="Message" name="message" as="textarea" placeholder="What's on your mind?" required />
+
+        <div style="margin-top:8px">
+          <Button type="submit" variant="primary" size="lg">Send message</Button>
+        </div>
+      </form>
+    </div>
+  </Section>
+
+  <script is:inline>
+    (function () {
+      var form = document.getElementById('contact-form');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var data = Object.fromEntries(new FormData(form).entries());
+        if (!data.name || !data.email || !data.message) {
+          if (window.AvaliaUI) AvaliaUI.toast({ type: 'info', title: 'Missing fields', message: 'Please fill in name, email, and a message.' });
+          return;
+        }
+        console.log('[contact] would submit:', data);
+        if (window.AvaliaUI) AvaliaUI.toast({ type: 'success', title: 'Message sent', message: 'Thanks — I\'ll reply within 48 hours.' });
+        form.reset();
+      });
+    })();
+  </script>
+
+</BaseLayout>

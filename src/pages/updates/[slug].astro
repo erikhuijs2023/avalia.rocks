@@ -1,0 +1,57 @@
+---
+/**
+ * /updates/[slug] — single update page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Badge from '../../components/Badge.astro';
+import Button from '../../components/Button.astro';
+import { updates, updateBySlug, adjacentUpdates } from '../../data/mock';
+
+export async function getStaticPaths() {
+  return updates
+    .filter((u) => u.status === 'published')
+    .map((u) => ({ params: { slug: u.slug } }));
+}
+
+const { slug } = Astro.params;
+const update = updateBySlug(slug!);
+if (!update) return Astro.redirect('/404');
+
+const { prev, next } = adjacentUpdates(slug!);
+const pubDate = new Date(update.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<BaseLayout title={`${update.titel} — Avalia`} active="updates">
+
+  <Section>
+    <article style="max-width:720px;margin:0 auto">
+      <div style="color:var(--text-secondary);font-size:14px;letter-spacing:.08em;text-transform:uppercase">
+        {pubDate}
+      </div>
+      <h1 style="margin:12px 0 18px;line-height:1.2">{update.titel}</h1>
+
+      {update.tags?.length > 0 && (
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+          {update.tags.map((t) => <Badge variant="category">{t}</Badge>)}
+        </div>
+      )}
+
+      {update.afbeelding && (
+        <img src={update.afbeelding} alt={update.titel}
+             style="width:100%;border-radius:var(--radius-md);margin:24px 0" />
+      )}
+
+      <div style="color:var(--text-primary);line-height:1.8;font-size:17px" set:html={update.content}></div>
+
+      <nav style="display:flex;gap:16px;justify-content:space-between;margin-top:64px;padding-top:32px;border-top:1px solid var(--border-subtle)">
+        {prev
+          ? <Button variant="ghost" href={`/updates/${prev.slug}`}>← {prev.titel}</Button>
+          : <span></span>}
+        {next
+          ? <Button variant="ghost" href={`/updates/${next.slug}`}>{next.titel} →</Button>
+          : <span></span>}
+      </nav>
+    </article>
+  </Section>
+
+</BaseLayout>

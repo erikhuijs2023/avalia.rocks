@@ -1,0 +1,73 @@
+---
+/**
+ * /promo/[slug] — promotion / campaign landing page.
+ * Slug derived from the promo's cta_url (/promo/<slug>).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PromoCard from '../../components/PromoCard.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Button from '../../components/Button.astro';
+import { promos, producten } from '../../data/mock';
+
+export async function getStaticPaths() {
+  return promos
+    .filter((p) => p.cta_url.startsWith('/promo/'))
+    .map((p) => ({ params: { slug: p.cta_url.replace('/promo/', '') } }));
+}
+
+const { slug } = Astro.params;
+const promo = promos.find((p) => p.cta_url === `/promo/${slug}`);
+if (!promo) return Astro.redirect('/404');
+
+// Hand-picked spotlight for the Eclipse campaign — IRL this would be a Directus
+// relation on the Promo content type.
+const spotlightSlugs: Record<string, string[]> = {
+  eclipse: ['neon-harness', 'eclipse-choker', 'pulse-cuffs']
+};
+const spotlight = (spotlightSlugs[slug!] || [])
+  .map((s) => producten.find((p) => p.slug === s))
+  .filter((x): x is NonNullable<typeof x> => Boolean(x));
+---
+<BaseLayout title={`${promo.titel} — Avalia`} active="home">
+
+  <PromoCard
+    title={promo.titel}
+    description={promo.beschrijving}
+    image={promo.afbeelding}
+    featured
+    minHeight="72vh"
+  />
+
+  <Section eyebrow="Limited drop" title="What's in the collection" reveal>
+    <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">
+      Three matched pieces in the Eclipse colourway. The harness, choker, and cuffs all sync to a shared HUD —
+      change colour once, change everywhere.
+    </p>
+
+    {spotlight.length > 0 && (
+      <div class="av-grid av-grid-3" style="margin-top:28px">
+        {spotlight.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    )}
+  </Section>
+
+  <Section tight>
+    <div style="text-align:center;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <Button variant="primary" size="lg" href="https://marketplace.secondlife.com/stores/example" external>
+        Get the set on Marketplace
+      </Button>
+      <Button variant="secondary" size="lg" href="/updates">Read the announcement</Button>
+    </div>
+  </Section>
+
+</BaseLayout>
