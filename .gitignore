@@ -29,3 +29,7 @@ pnpm-debug.log*
 # Claude Code per-machine config (permissions, launch config)
 .claude/launch.json
 .claude/settings.local.json
+
+# secrets — only .env.example is committed
+**/.env
+!**/.env.example

@@ -1,0 +1,65 @@
+# Avalia CMS — Directus + Postgres, bound to LAN.
+# Deploy path on mini-pc: /opt/sites/avalia-cms/
+# Generate .env on the host (see .env.example for the required variables).
+services:
+  directus:
+    image: directus/directus:11
+    container_name: avalia-cms
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${HOST_PORT:-8085}:8055"
+    volumes:
+      - uploads:/directus/uploads
+      - extensions:/directus/extensions
+    environment:
+      KEY: ${DIRECTUS_KEY:?set DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET:?set DIRECTUS_SECRET}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+
+      DB_CLIENT: pg
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+
+      # Public-facing URL of the Directus instance. Update when behind a reverse proxy.
+      PUBLIC_URL: ${PUBLIC_URL:-http://192.168.178.29:8085}
+
+      # CORS — allow the Astro frontend to call the REST API.
+      CORS_ENABLED: 'true'
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:4321}
+
+      # Cache + uploads sit on the mounted volume.
+      CACHE_ENABLED: 'true'
+      CACHE_TTL: '5m'
+      CACHE_AUTO_PURGE: 'true'
+
+      # Default WebSocket off — we only need REST.
+      WEBSOCKETS_ENABLED: 'false'
+
+  db:
+    image: postgres:16-alpine
+    container_name: avalia-cms-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U directus -d directus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  uploads:
+  extensions:
+  dbdata:
