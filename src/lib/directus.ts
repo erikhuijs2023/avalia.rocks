@@ -14,6 +14,12 @@ import type {
 
 const DIRECTUS_URL = (import.meta.env.DIRECTUS_URL || 'http://192.168.178.29:8085').replace(/\/$/, '');
 
+// Mirror manifest written by scripts/sync-cms-assets.mjs (runs as `prebuild`).
+// Maps Directus file UUID -> { path: '/img/cms/<uuid>.<ext>', ext, size, name }.
+// Empty when no mirror has run yet — directusAsset() falls back to live URLs.
+import cmsAssets from '../generated/cms-assets.json';
+const ASSET_MANIFEST = cmsAssets as Record<string, { path: string; ext: string; size: number; name: string }>;
+
 // ---------------------------------------------------------------------------
 // HTTP helpers
 // ---------------------------------------------------------------------------
@@ -28,7 +34,14 @@ async function api<T = any>(path: string): Promise<T> {
   return json.data as T;
 }
 
-/** Resolve a Directus file id to a public asset URL. */
+/** Resolve a Directus file id to a public asset URL.
+ *
+ *  - If the file was mirrored locally by `npm run prebuild`, returns the
+ *    local same-origin path (`/img/cms/<uuid>.<ext>`) so the built HTML never
+ *    references the CMS host directly.
+ *  - Otherwise falls back to the live Directus URL (handy in `npm run dev`
+ *    when you haven't synced yet, or for transforms via `params`).
+ */
 export function directusAsset(
   file?: string | { id: string } | null,
   params?: Record<string, string | number>
@@ -36,6 +49,8 @@ export function directusAsset(
   if (!file) return undefined;
   const id = typeof file === 'string' ? file : file.id;
   if (!id) return undefined;
+  // Mirrored copy wins when present and we aren't asking for a transform.
+  if (!params && ASSET_MANIFEST[id]) return ASSET_MANIFEST[id].path;
   const q = params
     ? '?' + Object.entries(params).map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')
     : '';

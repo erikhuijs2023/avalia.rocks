@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "sync:cms": "node scripts/sync-cms-assets.mjs",
+    "prebuild": "node scripts/sync-cms-assets.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
