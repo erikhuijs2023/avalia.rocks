@@ -161,11 +161,90 @@
   padding-right: 40px;
   cursor: pointer;
 }
-/* Force the native option panel into our dark palette. color-scheme: dark
-   on :root handles most browsers, but Chromium honours these explicit
-   colors when the OS theme is light. */
-.select option {
+/* ---------- CUSTOM SELECT (Field.astro as="select") ----------
+   We skin the native select because Chromium no longer honours CSS on
+   the dropdown panel itself — the native popup follows OS palette and
+   reads as low-contrast on a dark page. The real <select> stays in the
+   DOM (visually hidden) so form submission, validation and tab order
+   keep working. */
+.av-cselect {
+  position: relative;
+}
+.av-cselect-native {
+  /* Visually hidden but reachable to assistive tech via the real form
+     control. Form submit reads its value. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  opacity: 0;
+}
+.av-cselect-trigger {
+  width: 100%;
+  text-align: left;
+  position: relative;
+  padding-right: 40px;
+  cursor: pointer;
+}
+.av-cselect-trigger::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--accent-purple);
+  border-bottom: 2px solid var(--accent-purple);
+  transform: translateY(-65%) rotate(45deg);
+  transition: transform var(--dur) var(--ease);
+  pointer-events: none;
+}
+.av-cselect.is-open .av-cselect-trigger::after {
+  transform: translateY(-15%) rotate(-135deg);
+}
+.av-cselect-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
   background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-input);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), var(--glow-sm);
+  max-height: 280px;
+  overflow-y: auto;
+}
+.av-cselect-panel li {
+  margin: 0;
+  padding: 0;
+}
+.av-cselect-panel [data-cselect-option] {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.av-cselect-panel [data-cselect-option]:hover,
+.av-cselect-panel [data-cselect-option]:focus-visible {
+  background: var(--bg-surface-2);
+  outline: none;
+}
+.av-cselect-panel [data-cselect-option].is-active {
+  background: linear-gradient(135deg, rgba(68,102,255,0.18), rgba(238,68,170,0.18));
   color: var(--text-primary);
 }
 .select-wrap::after {

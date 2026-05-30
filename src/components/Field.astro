@@ -38,10 +38,23 @@ const norm = options.map((o) => (typeof o === 'string' ? { label: o, value: o } 
   )}
 
   {as === 'select' && (
-    <div class="select-wrap">
-      <select id={name} name={name} class="select" required={required} disabled={disabled}>
+    <div class="av-cselect" data-cselect>
+      <select id={name} name={name} class="av-cselect-native" required={required} disabled={disabled} tabindex="-1" aria-hidden="true">
         {norm.map((o) => <option value={o.value} selected={o.value === value}>{o.label}</option>)}
       </select>
+      <button type="button" class="select av-cselect-trigger" data-cselect-trigger
+        aria-haspopup="listbox" aria-expanded="false" disabled={disabled}>
+        <span data-cselect-label>{(norm.find((o) => o.value === value) || norm[0])?.label || ''}</span>
+      </button>
+      <ul class="av-cselect-panel" role="listbox" data-cselect-panel hidden>
+        {norm.map((o) => (
+          <li>
+            <button type="button" role="option" data-cselect-option data-value={o.value}
+              class={o.value === value ? 'is-active' : ''}
+              aria-selected={o.value === value ? 'true' : 'false'}>{o.label}</button>
+          </li>
+        ))}
+      </ul>
     </div>
   )}
 
@@ -52,3 +65,67 @@ const norm = options.map((o) => (typeof o === 'string' ? { label: o, value: o } 
 
   {error && <span class="field-error">{error}</span>}
 </div>
+
+<script>
+  // Idempotent custom select: skin .av-cselect over a real <select> so form
+  // submit still works, but the open panel uses our dark palette (Chrome no
+  // longer respects color-scheme for option panels).
+  function initCustomSelects() {
+    document.querySelectorAll('[data-cselect]').forEach((root) => {
+      if ((root as any)._bound) return;
+      (root as any)._bound = true;
+
+      const native = root.querySelector('select.av-cselect-native') as HTMLSelectElement;
+      const trigger = root.querySelector('[data-cselect-trigger]') as HTMLButtonElement;
+      const panel = root.querySelector('[data-cselect-panel]') as HTMLElement;
+      const label = root.querySelector('[data-cselect-label]') as HTMLElement;
+      if (!native || !trigger || !panel || !label) return;
+
+      const close = () => {
+        panel.setAttribute('hidden', '');
+        trigger.setAttribute('aria-expanded', 'false');
+        root.classList.remove('is-open');
+      };
+      const open = () => {
+        panel.removeAttribute('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        root.classList.add('is-open');
+      };
+
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (root.classList.contains('is-open')) close(); else open();
+      });
+
+      panel.querySelectorAll<HTMLButtonElement>('[data-cselect-option]').forEach((opt) => {
+        opt.addEventListener('click', () => {
+          const v = opt.dataset.value || '';
+          native.value = v;
+          label.textContent = opt.textContent || '';
+          panel.querySelectorAll('[data-cselect-option]').forEach((o) => {
+            o.classList.toggle('is-active', o === opt);
+            o.setAttribute('aria-selected', o === opt ? 'true' : 'false');
+          });
+          native.dispatchEvent(new Event('change', { bubbles: true }));
+          close();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!root.contains(e.target as Node)) close();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && root.classList.contains('is-open')) {
+          close();
+          trigger.focus();
+        }
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCustomSelects);
+  } else {
+    initCustomSelects();
+  }
+  document.addEventListener('astro:page-load', initCustomSelects);
+</script>
