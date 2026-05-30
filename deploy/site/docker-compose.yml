@@ -1,4 +1,4 @@
-# Avalia site — nginx serving the static Astro build.
+# Avalia site — nginx serving the static Astro build + mailer sidecar.
 # Deploy path on mini-pc: /opt/sites/avalia/
 # The deploy script (deploy.ps1) syncs ./html/ from the local dist/ output.
 services:
@@ -6,8 +6,30 @@ services:
     image: nginx:alpine
     container_name: avalia-web
     restart: unless-stopped
+    depends_on:
+      - mailer
     ports:
       - "192.168.178.29:8084:80"
     volumes:
       - ./html:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # Receives /api/contact through the nginx proxy and SMTPs to MAIL_TO.
+  # Secrets in /opt/sites/avalia/.env (mode 600, NOT in git).
+  # Build context is relative to THIS compose file. On the mini-pc the
+  # mailer source is copied next to this compose, so ./mailer works there.
+  mailer:
+    build: ./mailer
+    image: avalia-mailer:latest
+    container_name: avalia-mailer
+    restart: unless-stopped
+    expose:
+      - "8086"
+    environment:
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:?set SMTP_PORT}
+      SMTP_USER: ${SMTP_USER:?set SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS:?set SMTP_PASS}
+      MAIL_TO:   ${MAIL_TO:?set MAIL_TO}
+      MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM}
+      RATE_PER_HOUR: ${RATE_PER_HOUR:-5}

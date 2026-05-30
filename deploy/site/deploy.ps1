@@ -14,13 +14,19 @@
   Skip `npm run build` and reuse whatever is in dist/. Useful for retrying
   just the upload step.
 
+.PARAMETER Infra
+  Also push docker-compose.yml, nginx.conf and the mailer/ source, then
+  `docker compose up -d --build`. Use after editing infra-side code.
+
 .EXAMPLE
   .\deploy\site\deploy.ps1
   .\deploy\site\deploy.ps1 -SkipBuild
+  .\deploy\site\deploy.ps1 -Infra
 #>
 [CmdletBinding()]
 param(
-  [switch] $SkipBuild
+  [switch] $SkipBuild,
+  [switch] $Infra
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,6 +40,21 @@ function Ok($msg)   { Write-Host "  OK $msg" -ForegroundColor Green }
 
 Push-Location $RepoRoot
 try {
+  # 0. Infra sync (optional) --------------------------------------------------
+  if ($Infra) {
+    Step 'Syncing infra files (compose, nginx, mailer/)...'
+    scp deploy/site/docker-compose.yml deploy/site/nginx.conf "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'infra scp (compose+nginx) failed' }
+    scp -r deploy/mailer "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'infra scp (mailer) failed' }
+    Ok 'uploaded'
+
+    Step 'docker compose up -d --build ...'
+    ssh $SshHost "cd $RemoteRoot && docker compose up -d --build" | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'docker compose failed (run interactively to see logs)' }
+    Ok 'containers up'
+  }
+
   # 1. Build ------------------------------------------------------------------
   if (-not $SkipBuild) {
     Step 'Building Astro (pulling fresh data from Directus)...'

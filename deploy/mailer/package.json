@@ -1,0 +1,17 @@
+{
+  "name": "avalia-mailer",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Tiny HTTP -> SMTP relay for the Avalia contact form",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -8,7 +8,12 @@ Static Astro build, served by nginx, deployed to the mini-pc at
 ```powershell
 .\deploy\site\deploy.ps1            # build + upload + swap + verify
 .\deploy\site\deploy.ps1 -SkipBuild # just re-upload an existing dist/
+.\deploy\site\deploy.ps1 -Infra     # also push compose/nginx/mailer + docker compose up --build
 ```
+
+Use `-Infra` after editing `deploy/site/docker-compose.yml`,
+`deploy/site/nginx.conf`, or anything under `deploy/mailer/`. Routine
+content/code updates don't need it.
 
 The script:
 1. Runs `npm run build` (Astro fetches the latest content from Directus at this
@@ -22,8 +27,10 @@ The script:
 
 ```
 /opt/sites/avalia/
-├── docker-compose.yml   ← from this folder
+├── docker-compose.yml   ← from this folder (avalia-web + avalia-mailer)
 ├── nginx.conf            ← from this folder
+├── mailer/               ← from deploy/mailer/ (built into avalia-mailer image)
+├── .env                  ← Gmail SMTP creds (mode 600, NOT in git)
 └── html/                 ← deployed via deploy.ps1
 ```
 

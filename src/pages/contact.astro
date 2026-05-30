@@ -2,9 +2,12 @@
 /**
  * /contact — contact form.
  *
- * For now the submit handler is client-side only and just shows a success toast
- * + logs to console. To actually send mail, add an SSR adapter (e.g. node) to
- * astro.config and create src/pages/api/contact.ts that POSTs via Resend/SMTP.
+ * The form POSTs to /api/contact, which the avalia-web nginx proxies to
+ * the sidecar mailer container (deploy/mailer/). The mailer validates +
+ * SMTPs via Gmail.
+ *
+ * In `npm run dev` the /api/contact route doesn't exist (no proxy locally),
+ * so the fetch will fail and the form falls back to a friendly toast.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
@@ -30,6 +33,11 @@ const site = await getSite();
                options={['General', 'Collaboration', 'Support', 'Other']} />
         <Field label="Message" name="message" as="textarea" placeholder="What's on your mind?" required />
 
+        {/* Honeypot — real users never see this; bots fill it and get filtered. */}
+        <input type="text" name="website" tabindex="-1" autocomplete="off"
+               aria-hidden="true"
+               style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+
         <div style="margin-top:8px">
           <Button type="submit" variant="primary" size="lg">Send message</Button>
         </div>
@@ -40,17 +48,46 @@ const site = await getSite();
   <script is:inline>
     (function () {
       var form = document.getElementById('contact-form');
+      var submitBtn = form && form.querySelector('button[type=submit]');
       if (!form) return;
-      form.addEventListener('submit', function (e) {
+
+      function toast(type, title, message) {
+        if (window.AvaliaUI) AvaliaUI.toast({ type: type, title: title, message: message });
+      }
+
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
         var data = Object.fromEntries(new FormData(form).entries());
+
         if (!data.name || !data.email || !data.message) {
-          if (window.AvaliaUI) AvaliaUI.toast({ type: 'info', title: 'Missing fields', message: 'Please fill in name, email, and a message.' });
+          toast('info', 'Missing fields', 'Please fill in name, email, and a message.');
           return;
         }
-        console.log('[contact] would submit:', data);
-        if (window.AvaliaUI) AvaliaUI.toast({ type: 'success', title: 'Message sent', message: 'Thanks — I\'ll reply within 48 hours.' });
-        form.reset();
+
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+
+        try {
+          var res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          var body = await res.json().catch(function () { return {}; });
+          if (res.ok && body.ok) {
+            toast('success', 'Message sent', 'Thanks — I\'ll reply within 48 hours.');
+            form.reset();
+          } else if (res.status === 429) {
+            toast('info', 'Too many submits', 'Please wait a bit before trying again.');
+          } else {
+            toast('info', 'Could not send', body.error || 'Please try again, or email directly.');
+          }
+        } catch (err) {
+          // No backend reachable (dev mode, or mailer down) — degrade gracefully.
+          console.log('[contact] fetch failed:', err);
+          toast('info', 'Send unavailable', 'Try again later, or email directly.');
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send message'; }
+        }
       });
     })();
   </script>
