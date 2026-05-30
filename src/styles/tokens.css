@@ -4,6 +4,10 @@
    ============================================================ */
 
 :root {
+  /* Tell the browser to render native UI (scrollbars, form controls,
+     dropdown panels, autofill) in dark mode. */
+  color-scheme: dark;
+
   /* ---- Backgrounds ---- */
   --bg-deep: #0a0e1a;
   --bg-black: #050508;

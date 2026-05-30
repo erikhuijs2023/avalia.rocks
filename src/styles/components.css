@@ -161,6 +161,13 @@
   padding-right: 40px;
   cursor: pointer;
 }
+/* Force the native option panel into our dark palette. color-scheme: dark
+   on :root handles most browsers, but Chromium honours these explicit
+   colors when the OS theme is light. */
+.select option {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
 .select-wrap::after {
   content: "";
   position: absolute;
