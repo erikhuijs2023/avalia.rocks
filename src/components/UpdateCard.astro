@@ -1,0 +1,43 @@
+---
+/**
+ * UpdateCard — maps to the Directus `Updates` content type.
+ *
+ * <UpdateCard
+ *   title={u.titel}
+ *   href={`/updates/${u.slug}`}
+ *   date={u.publicatiedatum}
+ *   excerpt={u.excerpt}
+ *   image={directusAsset(u.afbeelding)}
+ * />
+ */
+export interface Props {
+  title: string;
+  href: string;
+  date?: string;          // ISO string or pre-formatted
+  excerpt?: string;
+  image?: string;
+  locale?: string;
+  class?: string;
+}
+const { title, href, date, excerpt, image, locale = 'en-GB', class: cls = '' } = Astro.props;
+
+function fmt(d?: string) {
+  if (!d) return '';
+  const parsed = new Date(d);
+  if (isNaN(+parsed)) return d; // already formatted
+  return parsed.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+const dateLabel = fmt(date);
+---
+<a class={['card-link', cls].filter(Boolean).join(' ')} href={href}>
+  <article class="update-card">
+    {image
+      ? <div class="media" style="overflow:hidden"><img src={image} alt={title} loading="lazy" style="width:100%;height:100%;object-fit:cover" /></div>
+      : <div class="media"></div>}
+    <div>
+      {dateLabel && <div class="uc-date">{dateLabel}</div>}
+      <div class="uc-title">{title}</div>
+      {excerpt && <p class="uc-excerpt">{excerpt}</p>}
+    </div>
+  </article>
+</a>

@@ -1,0 +1,17 @@
+---
+/**
+ * AccordionItem — a single row inside <Accordion>.
+ * <AccordionItem question="…" open>answer content (supports rich markup via slot)</AccordionItem>
+ */
+export interface Props {
+  question: string;
+  open?: boolean;
+}
+const { question, open = false } = Astro.props;
+---
+<div class={['acc-item', open ? 'is-open' : ''].filter(Boolean).join(' ')}>
+  <button class="acc-head">{question}<span class="acc-icon"></span></button>
+  <div class="acc-body" style={open ? 'max-height:400px' : ''}>
+    <div class="acc-body-inner"><slot /></div>
+  </div>
+</div>

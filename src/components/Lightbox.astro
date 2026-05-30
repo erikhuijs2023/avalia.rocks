@@ -1,0 +1,14 @@
+---
+/**
+ * Lightbox — global singleton markup for the image gallery overlay.
+ * Place ONCE in your base Layout. Pairs with <Gallery>.
+ * Behaviour (arrows / Esc / swipe) is handled by avalia-ui.js.
+ */
+import Icon from './Icon.astro';
+---
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" aria-label="Close">&times;</button>
+  <button class="lb-arrow lb-prev" aria-label="Previous"><Icon name="chevron-left" /></button>
+  <div class="lb-stage"></div>
+  <button class="lb-arrow lb-next" aria-label="Next"><Icon name="chevron-right" /></button>
+</div>

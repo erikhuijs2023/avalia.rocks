@@ -1,0 +1,54 @@
+---
+/**
+ * Field — a labelled form control. One component covers input / textarea / select.
+ *
+ * <Field label="Name" name="name" placeholder="Your SL name" />
+ * <Field label="Message" name="message" as="textarea" />
+ * <Field label="Subject" name="subject" as="select"
+ *        options={['General','Collaboration','Support','Other']} />
+ * <Field label="Email" name="email" error="Enter a valid email." />
+ */
+export interface Props {
+  label?: string;
+  name?: string;
+  as?: 'input' | 'textarea' | 'select';
+  type?: string;            // for input: text, email, …
+  placeholder?: string;
+  value?: string;
+  options?: (string | { label: string; value: string })[];
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  class?: string;
+}
+const {
+  label, name, as = 'input', type = 'text', placeholder, value = '',
+  options = [], required = false, disabled = false, error, class: cls = ''
+} = Astro.props;
+
+const inputClass = ['input', error ? 'is-error' : '', cls].filter(Boolean).join(' ');
+const norm = options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o));
+---
+<div class="field">
+  {label && <label class="field-label" for={name}>{label}</label>}
+
+  {as === 'textarea' && (
+    <textarea id={name} name={name} class={['textarea', error ? 'is-error' : '', cls].filter(Boolean).join(' ')}
+      placeholder={placeholder} required={required} disabled={disabled}>{value}</textarea>
+  )}
+
+  {as === 'select' && (
+    <div class="select-wrap">
+      <select id={name} name={name} class="select" required={required} disabled={disabled}>
+        {norm.map((o) => <option value={o.value} selected={o.value === value}>{o.label}</option>)}
+      </select>
+    </div>
+  )}
+
+  {as === 'input' && (
+    <input id={name} name={name} class={inputClass} type={type}
+      placeholder={placeholder} value={value} required={required} disabled={disabled} />
+  )}
+
+  {error && <span class="field-error">{error}</span>}
+</div>

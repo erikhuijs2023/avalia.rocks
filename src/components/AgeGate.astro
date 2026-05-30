@@ -1,0 +1,36 @@
+---
+/**
+ * AgeGate — 18+ verification overlay. Shows on first visit, choice stored in
+ * localStorage ("avalia_age_ok"). Wired by avalia-ui.js.
+ * Place ONCE in your base Layout (ideally first in <body>).
+ *
+ * <AgeGate brand="Avalia" leaveUrl="https://www.google.com" />
+ */
+import Button from './Button.astro';
+
+export interface Props {
+  brand?: string;
+  warning?: string;
+  confirmLabel?: string;
+  leaveLabel?: string;
+  leaveUrl?: string;
+}
+const {
+  brand = 'Avalia',
+  warning = 'This site contains images that may include partial nudity. Please confirm you are of legal age to continue.',
+  confirmLabel = "I'm 18 or older",
+  leaveLabel = 'Leave the site',
+  leaveUrl = 'https://www.google.com'
+} = Astro.props;
+---
+<div class="agegate" id="agegate" data-screen-label="Age Gate">
+  <div class="agegate-card">
+    <div class="ag-badge">18+</div>
+    <div class="agegate-logo text-accent">{brand}</div>
+    <p class="agegate-warn">{warning}</p>
+    <div class="agegate-actions">
+      <Button variant="primary" size="lg" class="" data-gate-confirm>{confirmLabel}</Button>
+      <button class="btn btn-ghost" data-gate-leave data-leave-url={leaveUrl}>{leaveLabel}</button>
+    </div>
+  </div>
+</div>

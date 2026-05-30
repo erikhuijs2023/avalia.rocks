@@ -1,0 +1,21 @@
+---
+/**
+ * Gallery — thumbnail grid for the product detail page. Clicking a thumb opens
+ * the global <Lightbox>. Requires <Lightbox /> present once in the Layout.
+ *
+ * <Gallery images={p.afbeeldingen.map(directusAsset)} />
+ */
+export interface Props {
+  images: string[];        // resolved asset URLs
+  name?: string;
+  class?: string;
+}
+const { images = [], name = 'detail', class: cls = '' } = Astro.props;
+---
+<div class={['thumb-grid', cls].filter(Boolean).join(' ')} data-gallery={name}>
+  {images.map((src, i) => (
+    <div class={['thumb', i === 0 ? 'is-active' : ''].filter(Boolean).join(' ')}
+         data-src={src}
+         style={`background-image:url(${src});background-size:cover;background-position:center`}></div>
+  ))}
+</div>

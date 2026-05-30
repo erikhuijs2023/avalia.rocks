@@ -1,0 +1,27 @@
+---
+/**
+ * TopTask — one of the 3 "top task" navigation blocks on the homepage.
+ * (Products / Support / News). Gradient-glow border, lifts on hover.
+ *
+ * <TopTask icon="box" title="Products" href="/products">
+ *   Browse the full collection.
+ * </TopTask>
+ */
+import Icon from './Icon.astro';
+
+export interface Props {
+  title: string;
+  href: string;
+  icon?: 'box' | 'message' | 'sparkle' | 'marketplace';
+  linkLabel?: string;
+  class?: string;
+}
+const { title, href, icon = 'box', linkLabel, class: cls = '' } = Astro.props;
+const label = linkLabel ?? `${title} →`;
+---
+<a class={['taak', cls].filter(Boolean).join(' ')} href={href} style="text-decoration:none">
+  <div class="taak-icon"><Icon name={icon} /></div>
+  <h4>{title}</h4>
+  <p><slot /></p>
+  <span class="taak-link"><span>{label}</span></span>
+</a>

@@ -1,0 +1,45 @@
+---
+/**
+ * Button — primary / secondary / ghost actions.
+ * Renders <a> when `href` is set, otherwise <button>.
+ *
+ * <Button variant="primary" href="/products">Shop now</Button>
+ * <Button variant="primary" href={url} external>On SL Marketplace</Button>
+ * <Button variant="ghost" accent>All updates →</Button>
+ */
+import Icon from './Icon.astro';
+
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  external?: boolean;   // adds external-link icon + target/rel
+  accent?: boolean;     // ghost link rendered with gradient text fill
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  disabled?: boolean;
+}
+const {
+  variant = 'primary', size = 'md', href, external = false,
+  accent = false, type = 'button', class: cls = '', disabled = false,
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'btn',
+  `btn-${variant}`,
+  size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : '',
+  variant === 'ghost' && accent ? 'link-accent' : '',
+  disabled ? 'is-disabled' : '',
+  cls
+].filter(Boolean).join(' ');
+
+const Tag = href ? 'a' : 'button';
+const extraAttrs = href
+  ? (external ? { href, target: '_blank', rel: 'noopener noreferrer' } : { href })
+  : { type, disabled };
+---
+<Tag class={classes} {...extraAttrs} {...rest}>
+  {variant === 'ghost' && accent ? <span><slot /></span> : <slot />}
+  {external && <Icon name="external" />}
+</Tag>

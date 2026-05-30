@@ -1,0 +1,81 @@
+---
+/**
+ * Example homepage — composed exactly to the blueprint wireframe.
+ * Demonstrates how the library components assemble. Swap the mock data
+ * for Directus queries (see ../lib/directus.ts).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PromoCard from '../components/PromoCard.astro';
+import TopTask from '../components/TopTask.astro';
+import ProductCard from '../components/ProductCard.astro';
+import UpdateCard from '../components/UpdateCard.astro';
+
+// --- mock data (replace with Directus) ---
+const hero = {
+  titel: 'Eclipse Collection',
+  beschrijving: 'A limited run of latex wearables with reactive neon glow.',
+  cta_tekst: 'Discover the drop',
+  cta_url: '/promo/eclipse'
+};
+const featured = [
+  { naam: 'Neon Harness', slug: 'neon-harness', categorie: 'Harness', korte_beschrijving: 'Glossy latex harness with a color-change HUD.', is_nieuw: true },
+  { naam: 'Glow Collar', slug: 'glow-collar', categorie: 'Accessory', korte_beschrijving: 'Emissive collar with adjustable neon glow.' },
+  { naam: 'Latex Bodysuit', slug: 'latex-bodysuit', categorie: 'Mesh', korte_beschrijving: 'Fully rigged, with materials and four textures.' }
+];
+const updates = [
+  { titel: 'Neon Harness v2.1 — new glow modes', slug: 'neon-harness-v21', publicatiedatum: '2026-05-24', excerpt: 'Three new pulsing glow presets and better LOD.' },
+  { titel: 'Color-change HUD gets favourites', slug: 'hud-favourites', publicatiedatum: '2026-05-18', excerpt: 'Save your own colour combos and swap in one tap.' }
+];
+---
+<BaseLayout title="Avalia — Second Life Digital Fashion" active="home">
+
+  <!-- Full-viewport hero (Directus Promo) -->
+  <PromoCard
+    title={hero.titel}
+    description={hero.beschrijving}
+    ctaText={hero.cta_tekst}
+    ctaUrl={hero.cta_url}
+    featured
+    minHeight="86vh"
+  />
+
+  <!-- Top tasks -->
+  <Section tight>
+    <div class="av-grid av-grid-3">
+      <TopTask icon="box" title="Products" href="/products">Browse the full collection with live previews.</TopTask>
+      <TopTask icon="message" title="Support" href="/contact">Questions about a purchase or a HUD? We're here.</TopTask>
+      <TopTask icon="sparkle" title="News" href="/updates">The latest drops, fixes and features.</TopTask>
+    </div>
+  </Section>
+
+  <!-- Featured products -->
+  <Section eyebrow="Shop" title="Featured products" viewAllHref="/products" viewAllLabel="View all products →" reveal>
+    <div class="av-grid av-grid-3">
+      {featured.map((p) => (
+        <ProductCard
+          name={p.naam}
+          href={`/products/${p.slug}`}
+          category={p.categorie}
+          description={p.korte_beschrijving}
+          isNew={p.is_nieuw}
+        />
+      ))}
+    </div>
+  </Section>
+
+  <!-- Latest updates -->
+  <Section eyebrow="News" title="Latest updates" viewAllHref="/updates" viewAllLabel="All updates →" reveal>
+    <div class="av-grid av-grid-2">
+      {updates.map((u) => (
+        <UpdateCard
+          title={u.titel}
+          href={`/updates/${u.slug}`}
+          date={u.publicatiedatum}
+          excerpt={u.excerpt}
+        />
+      ))}
+    </div>
+  </Section>
+
+</BaseLayout>

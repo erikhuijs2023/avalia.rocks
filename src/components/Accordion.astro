@@ -1,0 +1,35 @@
+---
+/**
+ * Accordion + AccordionItem — for FAQ / product features.
+ * Smooth height animation handled by avalia-ui.js. Add `single` to auto-close others.
+ *
+ * <Accordion single>
+ *   <AccordionItem question="Does it fit every body?" open>
+ *     Maitreya, Legacy, Reborn supported …
+ *   </AccordionItem>
+ *   <AccordionItem question="Free updates?">Yes — via redelivery.</AccordionItem>
+ * </Accordion>
+ *
+ * Or data-driven (FAQ from Directus):
+ * <Accordion single items={faq.map(f => ({ question: f.q, answer: f.a }))} />
+ */
+interface Item { question: string; answer: string; open?: boolean; }
+export interface Props {
+  single?: boolean;
+  items?: Item[];
+  class?: string;
+}
+const { single = false, items, class: cls = '' } = Astro.props;
+---
+<div class={['accordion', cls].filter(Boolean).join(' ')} data-accordion data-accordion-single={single ? '' : undefined}>
+  {items
+    ? items.map((it, i) => (
+        <div class={['acc-item', (it.open ?? i === 0) ? 'is-open' : ''].filter(Boolean).join(' ')}>
+          <button class="acc-head">{it.question}<span class="acc-icon"></span></button>
+          <div class="acc-body" style={(it.open ?? i === 0) ? 'max-height:400px' : ''}>
+            <div class="acc-body-inner">{it.answer}</div>
+          </div>
+        </div>
+      ))
+    : <slot />}
+</div>

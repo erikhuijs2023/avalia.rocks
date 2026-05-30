@@ -1,0 +1,20 @@
+---
+/**
+ * GlobalOverlays — drop ONCE in your base Layout. Bundles the singletons:
+ * age gate, lightbox, and the toast stack container.
+ *
+ * <GlobalOverlays brand="Avalia" leaveUrl="https://www.google.com" />
+ */
+import AgeGate from './AgeGate.astro';
+import Lightbox from './Lightbox.astro';
+
+export interface Props {
+  brand?: string;
+  leaveUrl?: string;
+  ageGate?: boolean;       // set false to omit the age gate
+}
+const { brand = 'Avalia', leaveUrl = 'https://www.google.com', ageGate = true } = Astro.props;
+---
+{ageGate && <AgeGate brand={brand} leaveUrl={leaveUrl} />}
+<Lightbox />
+<div id="toast-stack"></div>

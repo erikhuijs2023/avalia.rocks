@@ -1,0 +1,29 @@
+---
+/**
+ * CategoryFilter — row of filter pills. Emits a `filter:change` CustomEvent
+ * (detail.value) when a pill is clicked — listen for it to filter your grid,
+ * or render category pages server-side and use plain links instead.
+ *
+ * <CategoryFilter
+ *   options={[{label:'All',value:'all'}, {label:'Harnesses',value:'harnesses'}, …]}
+ *   active="all"
+ *   scrollable   // horizontal scroll w/ fade edges (good on mobile)
+ * />
+ */
+interface Opt { label: string; value?: string; }
+export interface Props {
+  options: (string | Opt)[];
+  active?: string;
+  scrollable?: boolean;
+  class?: string;
+}
+const { options = [], active, scrollable = false, class: cls = '' } = Astro.props;
+const norm: Opt[] = options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o));
+const wrapClass = [scrollable ? 'filter-scroll' : 'filter-row', cls].filter(Boolean).join(' ');
+const activeVal = active ?? (norm[0] && norm[0].value);
+---
+<div class={wrapClass} data-filter-group>
+  {norm.map((o) => (
+    <button class={['pill', o.value === activeVal ? 'is-active' : ''].filter(Boolean).join(' ')} data-value={o.value}>{o.label}</button>
+  ))}
+</div>

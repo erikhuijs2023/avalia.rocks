@@ -1,0 +1,33 @@
+---
+/**
+ * Badge — category labels and status badges.
+ *
+ * <Badge variant="category">Harnesses</Badge>
+ * <Badge variant="new" />            → "New"
+ * <Badge variant="updated" />        → "Updated"
+ * <Badge variant="featured" />       → ★ Featured
+ * Set `onImage` to absolutely position it top-left over a card image.
+ */
+import Icon from './Icon.astro';
+
+export interface Props {
+  variant?: 'category' | 'new' | 'updated' | 'featured';
+  onImage?: boolean;
+  label?: string;
+  class?: string;
+}
+const { variant = 'category', onImage = false, label, class: cls = '' } = Astro.props;
+
+const cssVariant: Record<string, string> = {
+  category: 'badge-cat', new: 'badge-new', updated: 'badge-updated', featured: 'badge-featured'
+};
+const defaults: Record<string, string> = {
+  category: '', new: 'New', updated: 'Updated', featured: 'Featured'
+};
+const text = label ?? defaults[variant];
+const classes = ['badge', cssVariant[variant], onImage ? 'badge-on-image' : '', cls].filter(Boolean).join(' ');
+---
+<span class={classes}>
+  {variant === 'featured' && <Icon name="star" />}
+  {text || <slot />}
+</span>

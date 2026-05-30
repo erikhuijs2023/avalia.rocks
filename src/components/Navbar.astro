@@ -1,0 +1,71 @@
+---
+/**
+ * Navbar — semi-transparent top nav meant to sit over the hero.
+ * Becomes compact + opaque on scroll (handled by avalia-ui.js via data-scroll-aware).
+ * Includes the mobile slide-out menu.
+ *
+ * <Navbar
+ *   brand="Avalia"
+ *   active="products"
+ *   links={[
+ *     { label: 'Products', href: '/products', key: 'products' },
+ *     { label: 'Updates',  href: '/updates',  key: 'updates' },
+ *     { label: 'About',    href: '/about',    key: 'about' },
+ *     { label: 'Contact',  href: '/contact',  key: 'contact' },
+ *   ]}
+ *   social={{ marketplace: '#', instagram: '#', bluesky: '#' }}
+ * />
+ */
+import Icon from './Icon.astro';
+
+interface Link { label: string; href: string; key?: string; }
+export interface Props {
+  brand?: string;
+  brandHref?: string;
+  links?: Link[];
+  active?: string;
+  social?: { marketplace?: string; instagram?: string; bluesky?: string };
+  class?: string;
+}
+const {
+  brand = 'Avalia', brandHref = '/',
+  links = [], active, social = {}, class: cls = ''
+} = Astro.props;
+
+const socialItems = [
+  { name: 'marketplace', url: social.marketplace, label: 'SL Marketplace' },
+  { name: 'instagram', url: social.instagram, label: 'Instagram' },
+  { name: 'bluesky', url: social.bluesky, label: 'Bluesky' }
+].filter((s) => s.url);
+---
+<nav class={['navbar', cls].filter(Boolean).join(' ')} data-scroll-aware data-screen-label="Navbar">
+  <a class="nav-logo text-accent" href={brandHref}>{brand}</a>
+
+  <div class="nav-links">
+    {links.map((l) => (
+      <a class={['nav-link', (l.key && l.key === active) ? 'is-active' : ''].filter(Boolean).join(' ')} href={l.href}>{l.label}</a>
+    ))}
+  </div>
+
+  <div class="nav-social">
+    {socialItems.map((s) => (
+      <a href={s.url} aria-label={s.label} title={s.label} target="_blank" rel="noopener noreferrer"><Icon name={s.name as any} /></a>
+    ))}
+    <button class="hamburger" aria-label="Open menu" data-mm-open="#avalia-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+
+  <!-- Mobile slide-out menu -->
+  <div class="mobile-menu" id="avalia-mobile-menu">
+    <button class="mobile-close" aria-label="Close menu" data-mm-close="#avalia-mobile-menu">&times;</button>
+    {links.map((l) => (
+      <a class={['mm-item', (l.key && l.key === active) ? 'text-accent' : ''].filter(Boolean).join(' ')} href={l.href}>{l.label}</a>
+    ))}
+    {socialItems.length > 0 && (
+      <div class="mm-social">
+        {socialItems.map((s) => (
+          <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer"><Icon name={s.name as any} /></a>
+        ))}
+      </div>
+    )}
+  </div>
+</nav>

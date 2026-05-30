@@ -1,0 +1,52 @@
+---
+/**
+ * ProductCard — maps to the Directus `Producten` content type.
+ * The whole card is a link to the product detail page.
+ *
+ * <ProductCard
+ *   name={p.naam}
+ *   href={`/products/${p.slug}`}
+ *   category={p.categorie?.naam}
+ *   description={p.korte_beschrijving}
+ *   image={directusAsset(p.afbeeldingen?.[0])}
+ *   isNew={p.is_nieuw}
+ *   isUpdated={false}
+ * />
+ */
+import Badge from './Badge.astro';
+
+export interface Props {
+  name: string;
+  href: string;
+  category?: string;
+  description?: string;
+  image?: string;        // resolved Directus asset URL; falls back to neon placeholder
+  alt?: string;
+  isNew?: boolean;
+  isUpdated?: boolean;
+  class?: string;
+}
+const {
+  name, href, category, description, image, alt = '',
+  isNew = false, isUpdated = false, class: cls = ''
+} = Astro.props;
+---
+<a class={['card-link', cls].filter(Boolean).join(' ')} href={href}>
+  <article class="product-card">
+    <div class="media">
+      {isNew && <Badge variant="new" onImage />}
+      {!isNew && isUpdated && <Badge variant="updated" onImage />}
+      <div class="pc-overlay"><span>View</span></div>
+      {image
+        ? <img src={image} alt={alt || name} loading="lazy" />
+        : <div class="media-label">{name}</div>}
+    </div>
+    <div class="pc-body">
+      <div class="pc-top">
+        <h4>{name}</h4>
+        {category && <Badge variant="category">{category}</Badge>}
+      </div>
+      {description && <p class="pc-desc">{description}</p>}
+    </div>
+  </article>
+</a>

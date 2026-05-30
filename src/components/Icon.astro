@@ -1,0 +1,33 @@
+---
+/**
+ * Icon — inline SVG icon set used across the library.
+ * Usage: <Icon name="instagram" />
+ */
+export interface Props {
+  name:
+    | 'marketplace' | 'instagram' | 'bluesky' | 'external'
+    | 'star' | 'chevron-left' | 'chevron-right'
+    | 'check' | 'info' | 'menu' | 'close'
+    | 'box' | 'message' | 'sparkle';
+  class?: string;
+}
+const { name, class: cls = '' } = Astro.props;
+
+const paths: Record<string, string> = {
+  marketplace: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+  instagram: '<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>',
+  bluesky: '<path fill="currentColor" stroke="none" d="M12 10.8C10.9 8.5 7.9 4.6 5.1 3.4 3.5 2.7 2 3.3 2 5.6c0 .9.5 4.5.8 5.1.7 2 2.6 2.6 4.4 2.4-2.6.4-4.9 1.4-1.9 4.8 3.3 3.4 4.5-.7 5.1-2.8l.6-2 .6 2c.6 2.1 1.8 6.2 5.1 2.8 3-3.4.7-4.4-1.9-4.8 1.8.2 3.7-.4 4.4-2.4.3-.6.8-4.2.8-5.1 0-2.3-1.5-2.9-3.1-2.2C16.1 4.6 13.1 8.5 12 10.8z"/>',
+  external: '<path d="M7 17 17 7M9 7h8v8"/>',
+  star: '<path fill="currentColor" stroke="none" d="m12 2 2.6 6.6L21 9.2l-5 4.6 1.5 6.8L12 17l-5.5 3.6L8 13.8l-5-4.6 6.4-.6z"/>',
+  'chevron-left': '<path d="m15 18-6-6 6-6"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>',
+  menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
+  close: '<path d="M6 6 18 18M18 6 6 18"/>',
+  box: '<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={cls} set:html={paths[name] || ''}></svg>

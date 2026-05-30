@@ -1,0 +1,61 @@
+---
+/**
+ * Footer — compact site footer. Pull values from the Directus `Site Instellingen` singleton.
+ *
+ * <Footer
+ *   brand={settings.site_naam}
+ *   tagline={settings.tagline}
+ *   links={[{label:'Products',href:'/products'}, …]}
+ *   social={settings.social_links}
+ * />
+ */
+import Icon from './Icon.astro';
+
+interface Link { label: string; href: string; }
+export interface Props {
+  brand?: string;
+  tagline?: string;
+  links?: Link[];
+  social?: { marketplace?: string; instagram?: string; bluesky?: string };
+  legal?: string;
+  class?: string;
+}
+const {
+  brand = 'Avalia',
+  tagline = 'Premium mesh wearables, HUDs & scripted accessories for Second Life.',
+  links = [], social = {},
+  legal = 'Second Life is a trademark of Linden Research, Inc.',
+  class: cls = ''
+} = Astro.props;
+
+const year = new Date().getFullYear();
+const socialItems = [
+  { name: 'marketplace', url: social.marketplace, label: 'SL Marketplace' },
+  { name: 'instagram', url: social.instagram, label: 'Instagram' },
+  { name: 'bluesky', url: social.bluesky, label: 'Bluesky' }
+].filter((s) => s.url);
+---
+<footer class={['footer', cls].filter(Boolean).join(' ')} data-screen-label="Footer">
+  <div class="footer-top">
+    <div>
+      <div class="f-logo text-accent">{brand}</div>
+      {tagline && <p style="color:var(--text-secondary);font-size:14px;max-width:300px;margin:10px 0 0">{tagline}</p>}
+    </div>
+    {links.length > 0 && (
+      <nav class="f-nav">
+        {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      </nav>
+    )}
+    {socialItems.length > 0 && (
+      <div class="f-social">
+        {socialItems.map((s) => (
+          <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer"><Icon name={s.name as any} /></a>
+        ))}
+      </div>
+    )}
+  </div>
+  <div class="f-bottom">
+    <span>© {year} {brand}. All rights reserved.</span>
+    {legal && <span>{legal}</span>}
+  </div>
+</footer>
