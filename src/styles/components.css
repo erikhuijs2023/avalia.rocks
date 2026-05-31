@@ -455,24 +455,31 @@
 
 /* ---------- NAVBAR ---------- */
 .navbar {
+  /* Logo and social sit at the edges via flex space-between; nav-links is
+     pulled out of the flow and absolutely centred so it doesn't get
+     pushed off by asymmetric edge widths. */
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 36px;
+  justify-content: space-between;
   padding: 14px 24px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-subtle);
   background: rgba(10, 14, 26, 0.55);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  /* Centered floating chip, sized to its content (per the claude.design
-     comp) instead of edge-to-edge. Caps at the container width so it never
-     gets absurdly wide. */
-  width: fit-content;
-  max-width: calc(100% - 48px);
+  /* Same width as the .av-container sections below (1200px max,
+     24px gutters on smaller viewports). */
+  width: min(var(--container), calc(100% - 48px));
   margin: 18px auto 0;
-  position: relative;
   z-index: 20;
   transition: padding var(--dur) var(--ease), background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.navbar > .nav-links {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 .navbar.is-scrolled {
   padding: 11px 28px;
