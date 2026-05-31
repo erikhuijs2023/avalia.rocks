@@ -52,8 +52,9 @@ async function main() {
   if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true, force: true });
   mkdirSync(OUT_DIR, { recursive: true });
 
-  // 2. List all files (anon read).
-  const res = await fetch(`${URL}/files?limit=-1&fields=id,filename_download,type,filesize,modified_on`);
+  // 2. List all files (anon read). Pull focal_point_* + dimensions so we can
+  //    surface them to CSS object-position downstream.
+  const res = await fetch(`${URL}/files?limit=-1&fields=id,filename_download,type,filesize,width,height,focal_point_x,focal_point_y,modified_on`);
   if (!res.ok) throw new Error(`list files: ${res.status} ${await res.text()}`);
   const { data: files } = await res.json();
   console.log(`  found ${files.length} file(s)`);
@@ -77,9 +78,21 @@ async function main() {
       }
       const buf = Buffer.from(await r.arrayBuffer());
       await writeFile(dest, buf);
-      manifest[f.id] = { path: localPath, ext, size: buf.length, name: f.filename_download };
+      const entry = { path: localPath, ext, size: buf.length, name: f.filename_download };
+      // Focal point: Directus stores absolute pixel coordinates. Convert to
+      // percent-of-{width,height} so CSS object-position can use them directly.
+      if (
+        f.focal_point_x != null && f.focal_point_y != null &&
+        f.width && f.height
+      ) {
+        const fx = Math.max(0, Math.min(100, (f.focal_point_x / f.width) * 100));
+        const fy = Math.max(0, Math.min(100, (f.focal_point_y / f.height) * 100));
+        entry.objectPosition = `${fx.toFixed(2)}% ${fy.toFixed(2)}%`;
+      }
+      manifest[f.id] = entry;
       totalBytes += buf.length;
-      console.log(`  + ${f.filename_download} -> ${localPath} (${(buf.length/1024).toFixed(1)} KB)`);
+      const fpNote = entry.objectPosition ? ` [focal ${entry.objectPosition}]` : '';
+      console.log(`  + ${f.filename_download} -> ${localPath} (${(buf.length/1024).toFixed(1)} KB)${fpNote}`);
     }
   });
   await Promise.all(workers);

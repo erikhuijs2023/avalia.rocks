@@ -15,10 +15,24 @@ import type {
 const DIRECTUS_URL = (import.meta.env.DIRECTUS_URL || 'http://192.168.178.29:8085').replace(/\/$/, '');
 
 // Mirror manifest written by scripts/sync-cms-assets.mjs (runs as `prebuild`).
-// Maps Directus file UUID -> { path: '/img/cms/<uuid>.<ext>', ext, size, name }.
+// Maps Directus file UUID -> { path, ext, size, name, objectPosition? }.
+// `objectPosition` only present when the file has a focal point set in Directus.
 // Empty when no mirror has run yet — directusAsset() falls back to live URLs.
 import cmsAssets from '../generated/cms-assets.json';
-const ASSET_MANIFEST = cmsAssets as Record<string, { path: string; ext: string; size: number; name: string }>;
+interface AssetEntry {
+  path: string; ext: string; size: number; name: string;
+  objectPosition?: string;
+}
+const ASSET_MANIFEST = cmsAssets as Record<string, AssetEntry>;
+
+/** Return the CSS `object-position` value for a Directus file, or undefined
+ *  when no focal point is set. Falls back to the browser default (centre)
+ *  when undefined. */
+export function directusFocal(file?: string | { id: string } | null): string | undefined {
+  if (!file) return undefined;
+  const id = typeof file === 'string' ? file : file.id;
+  return id ? ASSET_MANIFEST[id]?.objectPosition : undefined;
+}
 
 // ---------------------------------------------------------------------------
 // HTTP helpers
@@ -160,6 +174,7 @@ function toPromo(r: RawPromo): Promo {
     titel: r.titel,
     beschrijving: r.beschrijving || '',
     afbeelding: directusAsset(r.afbeelding),
+    afbeelding_focal: directusFocal(r.afbeelding),
     cta_tekst: r.cta_tekst || '',
     cta_url: r.cta_url || '',
     actief: r.actief,

@@ -47,6 +47,8 @@ export interface Promo {
   titel: string;
   beschrijving: string;
   afbeelding?: string;
+  /** CSS object-position from the Directus focal point, e.g. "47% 22%". */
+  afbeelding_focal?: string;
   cta_tekst: string;
   cta_url: string;
   actief: boolean;

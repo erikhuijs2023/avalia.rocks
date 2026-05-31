@@ -11,12 +11,6 @@
     "size": 852,
     "name": "placeholder-2.svg"
   },
-  "616b4fb8-0384-42d4-86e0-a271ba462d4b": {
-    "path": "/img/cms/616b4fb8-0384-42d4-86e0-a271ba462d4b.svg",
-    "ext": "svg",
-    "size": 1202,
-    "name": "hero-eclipse.svg"
-  },
   "ac050e96-2dae-4d6c-a94e-c3b65f4495ff": {
     "path": "/img/cms/ac050e96-2dae-4d6c-a94e-c3b65f4495ff.svg",
     "ext": "svg",
@@ -28,5 +22,12 @@
     "ext": "svg",
     "size": 855,
     "name": "placeholder-3.svg"
+  },
+  "616b4fb8-0384-42d4-86e0-a271ba462d4b": {
+    "path": "/img/cms/616b4fb8-0384-42d4-86e0-a271ba462d4b.jpg",
+    "ext": "jpg",
+    "size": 506919,
+    "name": "website mainbanner test 2.jpg",
+    "objectPosition": "45.78% 26.39%"
   }
 }
