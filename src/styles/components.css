@@ -681,12 +681,29 @@
 
 /* ---------- FOOTER ---------- */
 .footer {
+  position: relative;
   background: var(--bg-black);
-  border-top: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle);
   padding: 40px;
   border-radius: var(--radius-lg);
+  /* Same width + centering as the navbar so the footer chip lines up
+     with the page content above it. */
+  width: min(var(--container), calc(100% - 48px));
+  margin: 64px auto 32px;
 }
-.footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+.footer-top {
+  position: relative;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 24px; flex-wrap: wrap;
+}
+/* Pull the nav out of flex flow so it sits geometrically centered between
+   brand and social, regardless of their widths. */
+.footer .f-nav {
+  position: absolute;
+  left: 50%;
+  top: 4px;            /* nudges it to align visually with the brand baseline */
+  transform: translateX(-50%);
+}
 .footer .f-logo { font-family: var(--font-display); font-size: 28px; }
 .footer .f-nav { display: flex; gap: 24px; flex-wrap: wrap; }
 .footer .f-nav a { font-size: 14px; color: var(--text-secondary); transition: color var(--dur) var(--ease); }
