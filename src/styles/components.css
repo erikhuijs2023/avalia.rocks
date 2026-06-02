@@ -338,7 +338,7 @@
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 .product-card .media {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
 }
 .product-card .media img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease); }
 .product-card .pc-body { padding: 16px 18px 20px; }
@@ -618,7 +618,7 @@
 /* ---------- LIGHTBOX ---------- */
 .thumb-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .thumb {
-  aspect-ratio: 1; border-radius: 6px; overflow: hidden; cursor: pointer;
+  aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; cursor: pointer;
   border: 2px solid transparent; transition: all var(--dur) var(--ease);
 }
 .thumb.is-active { border-color: var(--accent-pink); box-shadow: var(--glow-sm); }
@@ -632,7 +632,7 @@
   opacity: 0; transition: opacity var(--dur) var(--ease);
 }
 .lightbox.is-open { display: flex; opacity: 1; }
-.lightbox .lb-stage { width: min(72vw, 760px); aspect-ratio: 4/3; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--glow-lg); }
+.lightbox .lb-stage { height: min(86vh, 1024px); aspect-ratio: 3/4; max-width: 92vw; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--glow-lg); }
 .lb-arrow, .lb-close {
   position: absolute; background: rgba(255,255,255,0.06); border: 1px solid var(--border-subtle);
   color: #fff; cursor: pointer; border-radius: 50%;
