@@ -33,3 +33,24 @@ services:
       MAIL_TO:   ${MAIL_TO:?set MAIL_TO}
       MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM}
       RATE_PER_HOUR: ${RATE_PER_HOUR:-5}
+
+  # Webhook-triggered rebuilder. Directus Flows POST /hook on content saves;
+  # the builder debounces, pulls the repo, runs `npm run build`, and rsyncs
+  # dist/ into ./html/ (same bind mount nginx serves — atomic in-place swap).
+  # Source + docs in deploy/builder/ in the repo.
+  builder:
+    build: ./builder
+    image: avalia-builder:latest
+    container_name: avalia-builder
+    restart: unless-stopped
+    ports:
+      - "192.168.178.29:8087:8087"
+    volumes:
+      - ./site-src:/srv/site       # git checkout (auto-cloned on first run)
+      - ./html:/srv/dist           # same html/ nginx serves
+    environment:
+      HOOK_TOKEN:   ${HOOK_TOKEN:?set HOOK_TOKEN}
+      REPO_URL:     ${REPO_URL:?set REPO_URL}
+      GIT_BRANCH:   ${GIT_BRANCH:-main}
+      DIRECTUS_URL: ${DIRECTUS_URL:-http://192.168.178.29:8085}
+      DEBOUNCE_MS:  ${DEBOUNCE_MS:-10000}

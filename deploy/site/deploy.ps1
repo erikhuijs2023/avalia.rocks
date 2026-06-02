@@ -47,6 +47,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'infra scp (compose+nginx) failed' }
     scp -r deploy/mailer "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'infra scp (mailer) failed' }
+    scp -r deploy/builder "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'infra scp (builder) failed' }
     Ok 'uploaded'
 
     Step 'docker compose up -d --build ...'

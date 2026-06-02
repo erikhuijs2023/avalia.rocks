@@ -1,0 +1,14 @@
+{
+  "name": "avalia-builder",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Webhook-triggered rebuilder for the Avalia static site. Pulls the repo, runs `npm run build` (which fetches fresh Directus content), then rsyncs dist/ into the html/ bind mount served by nginx.",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
