@@ -1,0 +1,41 @@
+# Avalia analytics — Umami + Postgres, bound to LAN.
+# Deploy path on mini-pc: /opt/sites/avalia-analytics/
+# See README.md for the deploy + first-login walkthrough.
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: avalia-umami
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "192.168.178.29:8088:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:${DB_PASSWORD:?set DB_PASSWORD}@db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET}
+      # Rename the tracker script so adblock filters that target
+      # "umami" don't drop it. Browsers fetch /<name>.js instead.
+      TRACKER_SCRIPT_NAME: ${TRACKER_SCRIPT_NAME:-avalia-stats.js}
+      # No telemetry phone-home.
+      DISABLE_TELEMETRY: "1"
+
+  db:
+    image: postgres:16-alpine
+    container_name: avalia-umami-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dbdata:
