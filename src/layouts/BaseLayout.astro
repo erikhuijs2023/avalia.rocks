@@ -15,6 +15,7 @@ import '../styles/components.css';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import GlobalOverlays from '../components/GlobalOverlays.astro';
+import { getSite } from '../lib/directus';
 
 export interface Props {
   title?: string;
@@ -22,16 +23,20 @@ export interface Props {
 }
 const { title = 'Avalia', active } = Astro.props;
 
-// In production, fetch these from Directus once and pass down.
+// Brand + tagline come from the Directus `site_instellingen` singleton so
+// you can rename the site from the CMS without a code change. Nav links and
+// social URLs are stable enough to live here.
+const settings = await getSite();
 const site = {
-  brand: 'Avalia',
+  brand: settings.site_naam,
+  tagline: settings.tagline,
   links: [
     { label: 'Products', href: '/products', key: 'products' },
     { label: 'Updates', href: '/updates', key: 'updates' },
     { label: 'About', href: '/about', key: 'about' },
     { label: 'Contact', href: '/contact', key: 'contact' }
   ],
-  social: { marketplace: '#', instagram: '#', bluesky: '#' }
+  social: settings.social_links
 };
 ---
 <!DOCTYPE html>
@@ -54,7 +59,7 @@ const site = {
     <slot />
   </main>
 
-  <Footer brand={site.brand} links={site.links} social={site.social} />
+  <Footer brand={site.brand} tagline={site.tagline} links={site.links} social={site.social} />
 
   <script is:inline src="/avalia-ui.js" defer></script>
 </body>
