@@ -50,13 +50,14 @@ const site = {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  {/* Umami analytics — privacy-friendly, no cookies. Self-hosted at
-      /opt/sites/avalia-analytics on the mini-pc, port 8088. Skipped on
-      `npm run dev` so local testing doesn't pollute the dashboard. */}
+  {/* Umami analytics — privacy-friendly, no cookies. Self-hosted on
+      the mini-pc behind the Unraid SWAG reverse proxy at
+      stats.avalia.rocks. Skipped on `npm run dev` so local testing
+      doesn't pollute the dashboard. */}
   {import.meta.env.PROD && (
     <script
       defer
-      src="http://192.168.178.29:8088/avalia-stats.js"
+      src="https://stats.avalia.rocks/avalia-stats.js"
       data-website-id="dd7f431a-9c20-47e4-9a07-43348c2d5096"></script>
   )}
 </head>
