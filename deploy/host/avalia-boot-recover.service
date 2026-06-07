@@ -1,0 +1,17 @@
+[Unit]
+Description=Recreate /opt/sites/* docker compose stacks if they failed at boot
+Documentation=file:///opt/sites/host/boot-recover.sh
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/sites/host/boot-recover.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target
