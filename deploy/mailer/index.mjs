@@ -39,7 +39,7 @@ async function storeTicket({ name, email, subject, message, ip }) {
     const res = await fetch(`${DIRECTUS_URL}/items/tickets`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TICKETS_TOKEN}` },
-      body: JSON.stringify({ naam: name, email, onderwerp: subject, bericht: message, ip }),
+      body: JSON.stringify({ name, email, subject, message, ip }),
       signal: AbortSignal.timeout(8000)
     });
     if (!res.ok) {

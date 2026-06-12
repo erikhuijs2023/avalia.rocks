@@ -344,10 +344,12 @@ async function buildFaq() {
 // them) — no saved filter needed.
 async function buildTickets() {
   console.log('\n[7/7] tickets');
+  // Field names are English (unlike the content collections): the support
+  // admin handling tickets doesn't speak Dutch.
   await ensureCollection('tickets', {
     meta: {
       icon: 'support_agent',
-      display_template: '{{onderwerp}} — {{naam}}',
+      display_template: '{{subject}} — {{name}}',
       archive_field: 'status', archive_value: 'closed', unarchive_value: 'new',
       collection: 'tickets'
     },
@@ -365,12 +367,12 @@ async function buildTickets() {
     },
     schema: { default_value: 'new', is_nullable: false }
   });
-  await ensureField('tickets', 'naam', f.string({ required: true }));
+  await ensureField('tickets', 'name', f.string({ required: true }));
   await ensureField('tickets', 'email', f.string({ required: true }));
-  await ensureField('tickets', 'onderwerp', f.string({ meta: { width: 'half' } }));
-  await ensureField('tickets', 'bericht', f.text());
+  await ensureField('tickets', 'subject', f.string({ meta: { width: 'half' } }));
+  await ensureField('tickets', 'message', f.text());
   // Internal notes for whoever handles the ticket — never shown to the sender.
-  await ensureField('tickets', 'notities', f.text());
+  await ensureField('tickets', 'notes', f.text());
   await ensureField('tickets', 'ip', f.string({ meta: { width: 'half', readonly: true } }));
   await ensureField('tickets', 'date_created', {
     type: 'timestamp',
@@ -435,10 +437,10 @@ async function buildTicketAccess() {
   const intakeId = await ensurePolicy('Tickets Intake', {
     app_access: false, admin_access: false, users: [{ user: botId }]
   });
-  // Create-only; status/notities excluded so the defaults always apply.
+  // Create-only; status/notes excluded so the defaults always apply.
   await ensurePermission(intakeId, {
     collection: 'tickets', action: 'create',
-    fields: ['naam', 'email', 'onderwerp', 'bericht', 'ip']
+    fields: ['name', 'email', 'subject', 'message', 'ip']
   });
 
   // -- Support role: for the human admin handling tickets --------------------
@@ -448,7 +450,7 @@ async function buildTicketAccess() {
   });
   await ensurePermission(supportPolicyId, { collection: 'tickets', action: 'read', fields: ['*'] });
   await ensurePermission(supportPolicyId, {
-    collection: 'tickets', action: 'update', fields: ['status', 'notities']
+    collection: 'tickets', action: 'update', fields: ['status', 'notes']
   });
 }
 
