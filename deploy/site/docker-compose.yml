@@ -33,6 +33,9 @@ services:
       MAIL_TO:   ${MAIL_TO:?set MAIL_TO}
       MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM}
       RATE_PER_HOUR: ${RATE_PER_HOUR:-5}
+      # Ticket storage in Directus (optional — mail-only when unset).
+      DIRECTUS_URL: ${DIRECTUS_URL:-http://192.168.178.29:8085}
+      TICKETS_TOKEN: ${TICKETS_TOKEN:-}
 
   # Webhook-triggered rebuilder. Directus Flows POST /hook on content saves;
   # the builder debounces, pulls the repo, runs `npm run build`, and rsyncs

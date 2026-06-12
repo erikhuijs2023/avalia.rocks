@@ -337,7 +337,122 @@ async function buildFaq() {
   await ensureField('faq', 'answer', f.text({ required: true }));
 }
 
-// ---- 7. Public read permissions -------------------------------------------
+// ---- 7. Tickets (support inbox, NOT public) ---------------------------------
+// Filled by the mailer sidecar when the contact form is submitted. Processed
+// in the Directus admin. status=closed doubles as the archive value, so the
+// admin's default list view hides closed tickets ("Show archived" reveals
+// them) — no saved filter needed.
+async function buildTickets() {
+  console.log('\n[7/7] tickets');
+  await ensureCollection('tickets', {
+    meta: {
+      icon: 'support_agent',
+      display_template: '{{onderwerp}} — {{naam}}',
+      archive_field: 'status', archive_value: 'closed', unarchive_value: 'new',
+      collection: 'tickets'
+    },
+    schema: {}
+  });
+  await ensureField('tickets', 'status', {
+    type: 'string',
+    meta: {
+      interface: 'select-dropdown', width: 'half', special: [],
+      options: { choices: [
+        { text: 'New', value: 'new' },
+        { text: 'In progress', value: 'progress' },
+        { text: 'Closed', value: 'closed' }
+      ]}
+    },
+    schema: { default_value: 'new', is_nullable: false }
+  });
+  await ensureField('tickets', 'naam', f.string({ required: true }));
+  await ensureField('tickets', 'email', f.string({ required: true }));
+  await ensureField('tickets', 'onderwerp', f.string({ meta: { width: 'half' } }));
+  await ensureField('tickets', 'bericht', f.text());
+  // Internal notes for whoever handles the ticket — never shown to the sender.
+  await ensureField('tickets', 'notities', f.text());
+  await ensureField('tickets', 'ip', f.string({ meta: { width: 'half', readonly: true } }));
+  await ensureField('tickets', 'date_created', {
+    type: 'timestamp',
+    meta: { interface: 'datetime', width: 'half', readonly: true, special: ['date-created'] },
+    schema: { is_nullable: true }
+  });
+}
+
+// ---- 7b. Ticket access: mailer-bot (create-only) + Support role -------------
+async function ensurePolicy(name, options) {
+  const all = await api('/policies');
+  const found = all.data.find((p) => p.name === name);
+  if (found) return found.id;
+  const r = await api('/policies', { method: 'POST', body: JSON.stringify({ name, ...options }) });
+  console.log(`  + policy ${name}`);
+  return r.data.id;
+}
+
+async function ensureRole(name, options = {}) {
+  const all = await api('/roles');
+  const found = all.data.find((r) => r.name === name);
+  if (found) return found.id;
+  const r = await api('/roles', { method: 'POST', body: JSON.stringify({ name, ...options }) });
+  console.log(`  + role ${name}`);
+  return r.data.id;
+}
+
+async function ensurePermission(policyId, perm) {
+  const existing = await api(`/permissions?filter[policy][_eq]=${policyId}&limit=-1`);
+  const cur = existing.data.find((p) => p.collection === perm.collection && p.action === perm.action);
+  const payload = { policy: policyId, ...perm };
+  if (cur) {
+    await api(`/permissions/${cur.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+  } else {
+    await api('/permissions', { method: 'POST', body: JSON.stringify(payload) });
+    console.log(`  + permission ${perm.collection}|${perm.action}`);
+  }
+}
+
+async function buildTicketAccess() {
+  console.log('\n[+] ticket access');
+
+  // -- mailer bot: a user with a static token, policy attached directly ------
+  const BOT_EMAIL = 'mailer-bot@avalia.rocks';
+  const TOKEN = process.env.TICKETS_TOKEN;
+  const users = await api(`/users?filter[email][_eq]=${encodeURIComponent(BOT_EMAIL)}`);
+  let botId = users.data[0]?.id;
+  if (!botId) {
+    const r = await api('/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: BOT_EMAIL, first_name: 'Mailer', last_name: 'Bot',
+        status: 'active', ...(TOKEN ? { token: TOKEN } : {})
+      })
+    });
+    botId = r.data.id;
+    console.log(`  + user ${BOT_EMAIL}`);
+  } else if (TOKEN) {
+    await api(`/users/${botId}`, { method: 'PATCH', body: JSON.stringify({ token: TOKEN }) });
+    console.log(`  ~ refreshed token for ${BOT_EMAIL}`);
+  }
+  const intakeId = await ensurePolicy('Tickets Intake', {
+    app_access: false, admin_access: false, users: [{ user: botId }]
+  });
+  // Create-only; status/notities excluded so the defaults always apply.
+  await ensurePermission(intakeId, {
+    collection: 'tickets', action: 'create',
+    fields: ['naam', 'email', 'onderwerp', 'bericht', 'ip']
+  });
+
+  // -- Support role: for the human admin handling tickets --------------------
+  const supportRoleId = await ensureRole('Support', { icon: 'support_agent' });
+  const supportPolicyId = await ensurePolicy('Support Tickets', {
+    app_access: true, admin_access: false, roles: [{ role: supportRoleId }]
+  });
+  await ensurePermission(supportPolicyId, { collection: 'tickets', action: 'read', fields: ['*'] });
+  await ensurePermission(supportPolicyId, {
+    collection: 'tickets', action: 'update', fields: ['status', 'notities']
+  });
+}
+
+// ---- 8. Public read permissions -------------------------------------------
 async function setPublicPermissions() {
   console.log('\n[+] public read permissions');
   // Directus 11: permissions attach to a POLICY (not a role directly). The
@@ -391,6 +506,8 @@ async function setPublicPermissions() {
   await buildPromos();
   await buildSiteInstellingen();
   await buildFaq();
+  await buildTickets();
+  await buildTicketAccess();
   await setPublicPermissions();
 
   console.log('\n✓ schema build complete');
