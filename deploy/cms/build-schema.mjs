@@ -128,9 +128,14 @@ const f = {
     meta: { interface: 'input', width: 'half', options: { slug: true, trim: true } },
     schema: { is_nullable: false, is_unique: true }
   }),
-  csvTags: () => ({
+  csvTags: (opts = {}) => ({
     type: 'csv',
-    meta: { interface: 'tags', width: 'full', special: ['cast-csv'] },
+    meta: {
+      interface: 'tags', width: 'full', special: ['cast-csv'],
+      // `presets` renders as click-to-add labels in the editor; typing
+      // custom values stays possible (allowCustom defaults to true).
+      ...(opts.presets ? { options: { presets: opts.presets } } : {})
+    },
     schema: { is_nullable: true }
   }),
   jsonList: () => ({
@@ -216,7 +221,21 @@ async function buildProducten() {
   await ensureField('producten', 'korte_beschrijving', f.text());
   await ensureField('producten', 'uitgebreide_beschrijving', f.richText());
   await ensureField('producten', 'features', f.jsonList());
-  await ensureField('producten', 'compatibiliteit', f.csvTags());
+  const COMPAT_PRESETS = [
+    'Reborn',
+    "Reborn Waifu's",
+    'Reborn Bimbo Boobs',
+    'Kupra',
+    'Maitreya LaraX',
+    'Legacy'
+  ];
+  await ensureField('producten', 'compatibiliteit', f.csvTags({ presets: COMPAT_PRESETS }));
+  // ensureField is create-only — enforce the presets on existing installs too.
+  await api('/fields/producten/compatibiliteit', {
+    method: 'PATCH',
+    body: JSON.stringify({ meta: { options: { presets: COMPAT_PRESETS } } })
+  });
+  console.log('  ~ producten.compatibiliteit presets enforced');
   await ensureField('producten', 'marketplace_url', f.string());
   await ensureField('producten', 'is_featured', f.bool(false));
   await ensureField('producten', 'is_nieuw', f.bool(false));
