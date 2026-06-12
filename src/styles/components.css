@@ -631,6 +631,45 @@ html.mm-lock { overflow: hidden; }
 #toast-stack .toast { animation: toast-in 320ms var(--ease); }
 @keyframes toast-in { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
+/* ---------- GALLERY (/gallery promo feed) ---------- */
+/* Cells reuse .thumb (portrait 3:4, lightbox-wired) with a caption under it. */
+.gallery-hero {
+  margin: 0 auto 56px;
+  max-width: 460px;
+}
+.gallery-hero .thumb { width: 100%; border-radius: var(--radius-lg); }
+.gallery-hero figcaption { text-align: center; margin-top: 18px; }
+.gallery-hero h3 { font-size: 28px; }
+.gallery-hero p { color: var(--text-secondary); font-size: 15px; margin: 8px auto 0; max-width: 52ch; }
+.gallery-hero .g-date { display: block; margin-top: 10px; font-size: 12px; color: var(--text-tertiary); letter-spacing: 0.06em; }
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.gallery-cell { margin: 0; }
+.gallery-cell figcaption { margin-top: 10px; }
+.gallery-cell h4 { font-family: var(--font-body); font-weight: 700; font-size: 15px; }
+.gallery-cell p {
+  color: var(--text-secondary); font-size: 13px; margin: 4px 0 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.gallery-pager {
+  display: flex; align-items: center; justify-content: center;
+  gap: 20px; margin-top: 48px;
+}
+.gallery-pager .g-page { font-size: 13px; color: var(--text-secondary); letter-spacing: 0.04em; }
+
+@media (max-width: 1023px) {
+  .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-hero { max-width: 340px; }
+}
+
 /* ---------- LIGHTBOX ---------- */
 .thumb-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .thumb {

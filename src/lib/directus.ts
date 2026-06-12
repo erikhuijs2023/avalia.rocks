@@ -9,7 +9,7 @@
  */
 
 import type {
-  Categorie, Product, Update, Promo, FAQItem, SiteInstellingen
+  Categorie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem
 } from '../data/mock';
 
 const DIRECTUS_URL = (import.meta.env.DIRECTUS_URL || 'http://192.168.178.29:8085').replace(/\/$/, '');
@@ -106,6 +106,18 @@ interface RawUpdate {
   afbeelding: string | null;
 }
 
+interface RawGalerij {
+  id: number;
+  status: string;
+  titel: string;
+  beschrijving: string | null;
+  alt_tekst: string | null;
+  afbeelding: string | null;
+  content_labels: string[] | null;
+  kanalen: string[] | null;
+  publicatiedatum: string | null;
+}
+
 interface RawPromo {
   id: number;
   titel: string;
@@ -167,6 +179,20 @@ function toUpdate(r: RawUpdate): Update {
     tags: r.tags || [],
     publicatiedatum: r.publicatiedatum || '',
     status: r.status as Update['status']
+  };
+}
+
+function toGalerij(r: RawGalerij): GalerijItem {
+  return {
+    id: r.id,
+    titel: r.titel,
+    beschrijving: r.beschrijving || '',
+    alt_tekst: r.alt_tekst || '',
+    afbeelding: directusAsset(r.afbeelding),
+    content_labels: r.content_labels || [],
+    kanalen: r.kanalen || [],
+    publicatiedatum: r.publicatiedatum || '',
+    status: r.status as GalerijItem['status']
   };
 }
 
@@ -276,6 +302,13 @@ export async function promoBySlug(slug: string): Promise<Promo | undefined> {
   return all.find((p) => p.cta_url === `/promo/${slug}`);
 }
 
+/** Published gallery images, newest first. Public role only exposes
+ *  status=published rows, so no extra filter needed. */
+export async function getGalerij(): Promise<GalerijItem[]> {
+  const raw = await api<RawGalerij[]>('/items/galerij?sort=-publicatiedatum&limit=-1');
+  return raw.map(toGalerij);
+}
+
 export async function getFaq(): Promise<FAQItem[]> {
   const raw = await api<RawFaq[]>('/items/faq?sort=sort&limit=-1');
   return raw.map((r) => ({ question: r.question, answer: r.answer }));
@@ -300,4 +333,4 @@ export async function getSite(): Promise<SiteInstellingen> {
 // Re-export the types so pages can `import type { Product } from '../lib/directus'`
 // without needing the mock file at all.
 // ---------------------------------------------------------------------------
-export type { Categorie, Product, Update, Promo, FAQItem, SiteInstellingen };
+export type { Categorie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem };

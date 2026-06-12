@@ -1,0 +1,50 @@
+---
+/**
+ * /gallery/2, /gallery/3, … — older gallery images in 4×4 grids.
+ * Page 1 (hero + 4×2) is gallery/index.astro.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Button from '../../components/Button.astro';
+import { getGalerij } from '../../lib/directus';
+import { pageCount, pageSlice } from './_paging';
+
+export async function getStaticPaths() {
+  const items = await getGalerij();
+  const total = pageCount(items.length);
+  return Array.from({ length: Math.max(total - 1, 0) }, (_, i) => ({
+    params: { page: String(i + 2) }
+  }));
+}
+
+const { page } = Astro.params;
+const n = Number(page);
+const items = await getGalerij();
+const totalPages = pageCount(items.length);
+const slice = pageSlice(items, n);
+const prevHref = n === 2 ? '/gallery' : `/gallery/${n - 1}`;
+---
+<BaseLayout title={`Gallery (page ${n}) — Avalia`} active="gallery">
+
+  <Section eyebrow="Eye candy" title="Gallery">
+    <div class="gallery-grid" data-gallery={`promo-${n}`}>
+      {slice.map((g) => (
+        <figure class="gallery-cell">
+          <div class="thumb" data-src={g.afbeelding}
+               style={`background-image:url(${g.afbeelding});background-size:cover;background-position:center`}></div>
+          <figcaption>
+            <h4>{g.titel}</h4>
+            {g.beschrijving && <p>{g.beschrijving}</p>}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+
+    <div class="gallery-pager">
+      <Button variant="secondary" href={prevHref}>← Newer</Button>
+      <span class="g-page">Page {n} of {totalPages}</span>
+      {n < totalPages && <Button variant="secondary" href={`/gallery/${n + 1}`}>Older →</Button>}
+    </div>
+  </Section>
+
+</BaseLayout>

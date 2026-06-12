@@ -45,6 +45,20 @@ export interface Update {
   status: 'published' | 'draft';
 }
 
+/** Promo image for the /gallery page; cross-posted to socials by the
+ *  Hermes agent via /gallery/feed.json. */
+export interface GalerijItem {
+  id: number;
+  titel: string;
+  beschrijving: string;
+  alt_tekst: string;                       // falls back to titel when empty
+  afbeelding?: string;                     // resolved URL, portrait 3:4
+  content_labels: string[];                // Bluesky self-label vocabulary
+  kanalen: string[];                       // e.g. ['bluesky','instagram']; empty = don't cross-post
+  publicatiedatum: string;                 // ISO 8601
+  status: 'published' | 'draft';
+}
+
 export interface Promo {
   id: number;
   titel: string;

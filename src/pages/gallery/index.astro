@@ -1,0 +1,68 @@
+---
+/**
+ * /gallery — promo image feed. The newest image is shown large (portrait),
+ * followed by a 4×2 grid of older ones. Pages 2+ live at /gallery/[page]
+ * with 4×4 grids. Every image opens in the global lightbox.
+ *
+ * Machine-readable mirror at /gallery/feed.json (consumed by the Hermes
+ * cross-posting agent).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Button from '../../components/Button.astro';
+import { getGalerij } from '../../lib/directus';
+import { GRID_FIRST, PER_PAGE, pageCount } from './_paging';
+
+const items = await getGalerij();
+const hero = items[0];
+const grid = items.slice(1, 1 + GRID_FIRST);
+const totalPages = pageCount(items.length);
+
+const fmt = (iso: string) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+---
+<BaseLayout title="Gallery — Avalia" active="gallery">
+
+  <Section eyebrow="Eye candy" title="Gallery">
+    {items.length === 0 ? (
+      <p style="color:var(--text-secondary)">Nothing here yet — first drop coming soon.</p>
+    ) : (
+      <div data-gallery="promo">
+
+        <figure class="gallery-hero">
+          <div class="thumb" data-src={hero.afbeelding}
+               style={`background-image:url(${hero.afbeelding});background-size:cover;background-position:center`}></div>
+          <figcaption>
+            <h3>{hero.titel}</h3>
+            {hero.beschrijving && <p>{hero.beschrijving}</p>}
+            <span class="g-date">{fmt(hero.publicatiedatum)}</span>
+          </figcaption>
+        </figure>
+
+        {grid.length > 0 && (
+          <div class="gallery-grid">
+            {grid.map((g) => (
+              <figure class="gallery-cell">
+                <div class="thumb" data-src={g.afbeelding}
+                     style={`background-image:url(${g.afbeelding});background-size:cover;background-position:center`}></div>
+                <figcaption>
+                  <h4>{g.titel}</h4>
+                  {g.beschrijving && <p>{g.beschrijving}</p>}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+
+      </div>
+    )}
+
+    {totalPages > 1 && (
+      <div class="gallery-pager">
+        <span class="g-page">Page 1 of {totalPages}</span>
+        <Button variant="secondary" href="/gallery/2">Older →</Button>
+      </div>
+    )}
+  </Section>
+
+</BaseLayout>

@@ -337,6 +337,61 @@ async function buildFaq() {
   await ensureField('faq', 'answer', f.text({ required: true }));
 }
 
+// ---- 6b. Galerij (promo image feed) -----------------------------------------
+// Standalone promo images for the /gallery page. Also exposed as
+// /gallery/feed.json for the Hermes agent, which cross-posts new images to
+// Bluesky (and later other socials). content_labels uses Bluesky's
+// self-label vocabulary so the agent can pass them through 1:1; kanalen
+// says where the agent may post (empty = nowhere).
+async function buildGalerij() {
+  console.log('\n[6b] galerij');
+  await ensureCollection('galerij', {
+    meta: {
+      icon: 'image',
+      display_template: '{{titel}}',
+      archive_field: 'status', archive_value: 'archived', unarchive_value: 'published',
+      sort_field: 'publicatiedatum',
+      collection: 'galerij'
+    },
+    schema: {}
+  });
+  await ensureField('galerij', 'status', {
+    type: 'string',
+    meta: {
+      interface: 'select-dropdown', width: 'half', special: [],
+      options: { choices: [
+        { text: 'Published', value: 'published' },
+        { text: 'Draft', value: 'draft' },
+        { text: 'Archived', value: 'archived' }
+      ]}
+    },
+    schema: { default_value: 'draft', is_nullable: false }
+  });
+  await ensureField('galerij', 'titel', f.string({ required: true }));
+  await ensureField('galerij', 'beschrijving', f.text());
+  // Alt text for socials/accessibility; the agent falls back to titel.
+  await ensureField('galerij', 'alt_tekst', f.string());
+  await ensureField('galerij', 'publicatiedatum', f.datetime());
+  await ensureField('galerij', 'afbeelding', f.imageRef());
+  await ensureRelation({
+    collection: 'galerij', field: 'afbeelding', related_collection: 'directus_files',
+    meta: { sort_field: null }, schema: { on_delete: 'SET NULL' }
+  });
+  // Bluesky self-label values — agent maps these straight onto the post.
+  await ensureField('galerij', 'content_labels', f.csvTags({
+    presets: ['sexual', 'nudity', 'porn', 'graphic-media']
+  }));
+  // Where the agent may cross-post this image. Empty = nowhere.
+  await ensureField('galerij', 'kanalen', {
+    type: 'csv',
+    meta: {
+      interface: 'tags', width: 'full', special: ['cast-csv'],
+      options: { presets: ['bluesky', 'instagram'] }
+    },
+    schema: { default_value: 'bluesky', is_nullable: true }
+  });
+}
+
 // ---- 7. Tickets (support inbox, NOT public) ---------------------------------
 // Filled by the mailer sidecar when the contact form is submitted. Processed
 // in the Directus admin. status=closed doubles as the archive value, so the
@@ -473,6 +528,7 @@ async function setPublicPermissions() {
     { collection: 'categorieen', action: 'read', fields: '*' },
     { collection: 'producten', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
     { collection: 'updates', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
+    { collection: 'galerij', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
     { collection: 'promos', action: 'read', fields: '*', permissions: { actief: { _eq: true } } },
     { collection: 'site_instellingen', action: 'read', fields: '*' },
     { collection: 'faq', action: 'read', fields: '*' },
@@ -508,6 +564,7 @@ async function setPublicPermissions() {
   await buildPromos();
   await buildSiteInstellingen();
   await buildFaq();
+  await buildGalerij();
   await buildTickets();
   await buildTicketAccess();
   await setPublicPermissions();
