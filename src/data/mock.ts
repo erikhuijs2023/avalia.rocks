@@ -13,10 +13,13 @@ export interface Categorie {
   icoon?: string;
 }
 
+export type Merk = 'avas-lewd' | 'hdm';
+
 export interface Product {
   id: number;
   naam: string;
   slug: string;
+  merk: Merk;                              // sub-brand; not rendered on the product page
   categorie: Categorie;
   korte_beschrijving: string;
   uitgebreide_beschrijving: string;       // accepts HTML
@@ -88,6 +91,7 @@ export const producten: Product[] = [
     id: 1,
     naam: 'Neon Harness',
     slug: 'neon-harness',
+    merk: 'avas-lewd',
     categorie: catBySlug('wearables'),
     korte_beschrijving: 'Glossy latex harness with a color-change HUD.',
     uitgebreide_beschrijving:
@@ -111,6 +115,7 @@ export const producten: Product[] = [
     id: 2,
     naam: 'Glow Collar',
     slug: 'glow-collar',
+    merk: 'avas-lewd',
     categorie: catBySlug('accessories'),
     korte_beschrijving: 'Emissive collar with adjustable neon glow.',
     uitgebreide_beschrijving:
@@ -128,6 +133,7 @@ export const producten: Product[] = [
     id: 3,
     naam: 'Latex Bodysuit',
     slug: 'latex-bodysuit',
+    merk: 'avas-lewd',
     categorie: catBySlug('wearables'),
     korte_beschrijving: 'Fully rigged, with materials and four textures.',
     uitgebreide_beschrijving:
@@ -145,6 +151,7 @@ export const producten: Product[] = [
     id: 4,
     naam: 'Color-Change HUD',
     slug: 'color-change-hud',
+    merk: 'avas-lewd',
     categorie: catBySlug('huds'),
     korte_beschrijving: 'Universal colour HUD with favourites and presets.',
     uitgebreide_beschrijving:
@@ -162,6 +169,7 @@ export const producten: Product[] = [
     id: 5,
     naam: 'Eclipse Choker',
     slug: 'eclipse-choker',
+    merk: 'avas-lewd',
     categorie: catBySlug('accessories'),
     korte_beschrijving: 'A minimal choker from the Eclipse drop.',
     uitgebreide_beschrijving:
@@ -179,6 +187,7 @@ export const producten: Product[] = [
     id: 6,
     naam: 'Reactive Mesh Body Add-on',
     slug: 'reactive-mesh-addon',
+    merk: 'avas-lewd',
     categorie: catBySlug('mesh-bodies'),
     korte_beschrijving: 'Latex appliers + glow layer for major mesh bodies.',
     uitgebreide_beschrijving:
@@ -196,6 +205,7 @@ export const producten: Product[] = [
     id: 7,
     naam: 'Pulse Cuffs',
     slug: 'pulse-cuffs',
+    merk: 'avas-lewd',
     categorie: catBySlug('accessories'),
     korte_beschrijving: 'Wrist + ankle cuffs that pulse to local music.',
     uitgebreide_beschrijving:
@@ -213,6 +223,7 @@ export const producten: Product[] = [
     id: 8,
     naam: 'Showroom HUD',
     slug: 'showroom-hud',
+    merk: 'avas-lewd',
     categorie: catBySlug('huds'),
     korte_beschrijving: 'A creator HUD for in-world product showrooms.',
     uitgebreide_beschrijving:

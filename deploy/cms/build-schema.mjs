@@ -195,6 +195,19 @@ async function buildProducten() {
   });
   await ensureField('producten', 'naam', f.string({ required: true }));
   await ensureField('producten', 'slug', f.slug());
+  // Sub-brand the product belongs to. Not rendered on the product page —
+  // used to split the catalog (e.g. the HDM landing page).
+  await ensureField('producten', 'merk', {
+    type: 'string',
+    meta: {
+      interface: 'select-dropdown', width: 'half', special: [],
+      options: { choices: [
+        { text: "Ava's Lewd", value: 'avas-lewd' },
+        { text: 'HDM', value: 'hdm' }
+      ]}
+    },
+    schema: { default_value: 'avas-lewd', is_nullable: false }
+  });
   await ensureField('producten', 'categorie', f.m2o());
   await ensureRelation({
     collection: 'producten', field: 'categorie', related_collection: 'categorieen',

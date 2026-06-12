@@ -82,6 +82,7 @@ interface RawProduct {
   naam: string;
   slug: string;
   categorie: RawCategorie;
+  merk: string | null;
   korte_beschrijving: string | null;
   uitgebreide_beschrijving: string | null;
   features: { item: string }[] | null;
@@ -140,6 +141,7 @@ function toProduct(r: RawProduct): Product {
     id: r.id,
     naam: r.naam,
     slug: r.slug,
+    merk: (r.merk === 'hdm' ? 'hdm' : 'avas-lewd'),
     categorie: r.categorie ? toCategorie(r.categorie) : { id: 0, naam: '', slug: '' },
     korte_beschrijving: r.korte_beschrijving || '',
     uitgebreide_beschrijving: r.uitgebreide_beschrijving || '',
