@@ -498,6 +498,42 @@ async function buildTicketAccess() {
     fields: ['name', 'email', 'subject', 'message', 'ip']
   });
 
+  // -- content bot: used by the local add-products workflow ------------------
+  // Scoped token for creating products from poster images (Claude reads the
+  // posters and calls scripts/add-product.mjs). Create+read only — cannot
+  // touch tickets, settings or users.
+  const CONTENT_BOT_EMAIL = 'content-bot@avalia.rocks';
+  const CONTENT_TOKEN = process.env.CONTENT_TOKEN;
+  const cUsers = await api(`/users?filter[email][_eq]=${encodeURIComponent(CONTENT_BOT_EMAIL)}`);
+  let contentBotId = cUsers.data[0]?.id;
+  if (!contentBotId) {
+    const r = await api('/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: CONTENT_BOT_EMAIL, first_name: 'Content', last_name: 'Bot',
+        status: 'active', ...(CONTENT_TOKEN ? { token: CONTENT_TOKEN } : {})
+      })
+    });
+    contentBotId = r.data.id;
+    console.log(`  + user ${CONTENT_BOT_EMAIL}`);
+  } else if (CONTENT_TOKEN) {
+    await api(`/users/${contentBotId}`, { method: 'PATCH', body: JSON.stringify({ token: CONTENT_TOKEN }) });
+    console.log(`  ~ refreshed token for ${CONTENT_BOT_EMAIL}`);
+  }
+  const contentPolicyId = await ensurePolicy('Content Intake', {
+    app_access: false, admin_access: false, users: [{ user: contentBotId }]
+  });
+  for (const [collection, actions] of [
+    ['producten', ['create', 'read']],
+    ['categorieen', ['create', 'read']],
+    ['galerij', ['create', 'read']],
+    ['directus_files', ['create', 'read']]
+  ]) {
+    for (const action of actions) {
+      await ensurePermission(contentPolicyId, { collection, action, fields: ['*'] });
+    }
+  }
+
   // -- Support role: for the human admin handling tickets --------------------
   const supportRoleId = await ensureRole('Support', { icon: 'support_agent' });
   const supportPolicyId = await ensurePolicy('Support Tickets', {
