@@ -87,20 +87,31 @@
 
   /* ---------- MOBILE MENU ---------- */
   function initMobileMenu() {
+    // mm-lock on <html> freezes the page behind the open overlay.
+    function setOpen(t, open) {
+      if (!t) return;
+      t.classList.toggle("is-open", open);
+      document.documentElement.classList.toggle("mm-lock", open);
+    }
     document.querySelectorAll("[data-mm-open]").forEach(function (b) {
       if (b.dataset.bound) return; b.dataset.bound = "1";
       b.addEventListener("click", function () {
-        var t = document.querySelector(b.getAttribute("data-mm-open"));
-        if (t) t.classList.add("is-open");
+        setOpen(document.querySelector(b.getAttribute("data-mm-open")), true);
       });
     });
     document.querySelectorAll("[data-mm-close]").forEach(function (b) {
       if (b.dataset.bound) return; b.dataset.bound = "1";
       b.addEventListener("click", function () {
-        var t = document.querySelector(b.getAttribute("data-mm-close"));
-        if (t) t.classList.remove("is-open");
+        setOpen(document.querySelector(b.getAttribute("data-mm-close")), false);
       });
     });
+    if (!document.documentElement.dataset.mmEscBound) {
+      document.documentElement.dataset.mmEscBound = "1";
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape") return;
+        document.querySelectorAll(".mobile-menu.is-open").forEach(function (m) { setOpen(m, false); });
+      });
+    }
   }
 
   /* ---------- FILTER PILLS ---------- */

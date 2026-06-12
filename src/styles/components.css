@@ -521,10 +521,23 @@
 }
 .hamburger span { width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: all var(--dur) var(--ease); }
 
+/* < 768px: nav-links and social icons collapse into the hamburger menu
+   (the menu's own mm-social repeats the social links). */
+@media (max-width: 767px) {
+  .navbar > .nav-links { display: none; }
+  .nav-social a { display: none; }
+  .hamburger { display: flex; }
+}
+
 /* mobile nav (rendered inside phone frame) */
 .mnav { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); }
+/* Full-viewport slide-out. Lives OUTSIDE the navbar in the DOM (see
+   Navbar.astro) so position:fixed isn't trapped by the navbar's
+   backdrop-filter containing block. z-index between the navbar (20)
+   and the lightbox (300). */
 .mobile-menu {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0;
+  height: 100dvh;
   background: rgba(5,5,8,0.97);
   display: flex; flex-direction: column;
   padding: 70px 24px 24px;
@@ -533,8 +546,11 @@
   visibility: hidden;
   pointer-events: none;
   transition: transform 320ms var(--ease), visibility 0s linear 320ms;
-  z-index: 5;
+  z-index: 150;
 }
+/* Set by avalia-ui.js while the menu is open — stops the page behind
+   the overlay from scrolling. */
+html.mm-lock { overflow: hidden; }
 .mobile-menu.is-open {
   transform: translateX(0);
   visibility: visible;
@@ -713,6 +729,13 @@
 .footer .f-social a:hover { color: #fff; box-shadow: var(--glow-sm); background: var(--accent-gradient-soft); }
 .footer .f-social svg { width: 17px; height: 17px; }
 .footer .f-bottom { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-tertiary); }
+
+/* < 768px: the absolutely-centered f-nav would overlap the brand/tagline —
+   stack everything vertically instead. */
+@media (max-width: 767px) {
+  .footer-top { flex-direction: column; }
+  .footer .f-nav { position: static; transform: none; }
+}
 
 /* ============================================================
    LAYOUT UTILITIES  (for use on the real Astro site)

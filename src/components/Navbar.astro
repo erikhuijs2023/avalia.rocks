@@ -53,19 +53,21 @@ const socialItems = [
     ))}
     <button class="hamburger" aria-label="Open menu" data-mm-open="#avalia-mobile-menu"><span></span><span></span><span></span></button>
   </div>
-
-  <!-- Mobile slide-out menu -->
-  <div class="mobile-menu" id="avalia-mobile-menu">
-    <button class="mobile-close" aria-label="Close menu" data-mm-close="#avalia-mobile-menu">&times;</button>
-    {links.map((l) => (
-      <a class={['mm-item', (l.key && l.key === active) ? 'text-accent' : ''].filter(Boolean).join(' ')} href={l.href}>{l.label}</a>
-    ))}
-    {socialItems.length > 0 && (
-      <div class="mm-social">
-        {socialItems.map((s) => (
-          <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer"><Icon name={s.name as any} /></a>
-        ))}
-      </div>
-    )}
-  </div>
 </nav>
+
+<!-- Mobile slide-out menu. Deliberately a SIBLING of the nav, not a child:
+     the navbar's backdrop-filter creates a containing block, which would trap
+     this position:fixed overlay inside the navbar chip. -->
+<div class="mobile-menu" id="avalia-mobile-menu">
+  <button class="mobile-close" aria-label="Close menu" data-mm-close="#avalia-mobile-menu">&times;</button>
+  {links.map((l) => (
+    <a class={['mm-item', (l.key && l.key === active) ? 'text-accent' : ''].filter(Boolean).join(' ')} href={l.href}>{l.label}</a>
+  ))}
+  {socialItems.length > 0 && (
+    <div class="mm-social">
+      {socialItems.map((s) => (
+        <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer"><Icon name={s.name as any} /></a>
+      ))}
+    </div>
+  )}
+</div>
