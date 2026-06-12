@@ -89,13 +89,21 @@ if (categoryName) {
   if (hit) {
     categorieId = hit.id;
     console.log(`category: ${hit.naam} (#${hit.id})`);
-  } else {
+  } else if (arg('create-category', false) === true) {
+    // Only with the explicit flag — policy is to ask the user before
+    // growing the taxonomy (every category becomes a filter pill +
+    // collections page).
     const made = await api('/items/categorieen', {
       method: 'POST',
       body: JSON.stringify({ naam: categoryName, slug: slugify(categoryName), icoon: 'star' })
     });
     categorieId = made.data.id;
     console.log(`category CREATED: ${categoryName} (#${categorieId})`);
+  } else {
+    const cats2 = await api('/items/categorieen?fields=naam&limit=-1');
+    console.error(`No category matches "${categoryName}". Existing: ${cats2.data.map((c) => c.naam).join(', ')}.`);
+    console.error('Ask the user, then re-run with an existing category or add --create-category.');
+    process.exit(1);
   }
 }
 

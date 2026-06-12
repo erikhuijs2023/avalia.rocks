@@ -17,9 +17,13 @@ publishes (publishing triggers the site rebuild automatically).
 2. **Read each image with the Read tool** and extract:
    - **name** — the product title on the poster (e.g. "CAPRICE THONG" → "Caprice Thong").
    - **merk** — look for the brand logo: the HDM / HDM2 logo → `hdm`; otherwise → `avas-lewd`.
-   - **category** — derive from the product type on the poster. Existing categories
-     (match these before inventing new ones): Heels, Boots, Jackets, tops,
-     Belt and garters, Thong / Panties. Only pass a new category name when nothing fits.
+   - **category** — derive from the product type on the poster and match it to
+     an EXISTING category (fetch the live list: `/items/categorieen`; at the
+     time of writing: Heels, Boots, Jackets, Tops, Belt and garters,
+     Thong / Panties). If nothing fits, ASK THE USER first (new category, or
+     file it under an existing one?) — never invent categories silently. Only
+     after the user approves a new one, pass `--create-category`. The script
+     enforces this: an unknown category without that flag is an error.
    - **compat** — body names listed on the poster. Map to the site's canonical labels:
      `Reborn`, `Reborn Waifu's`, `Reborn Bimbo Boobs`, `Kupra`, `Legacy`,
      "LaraX"/"Maitreya" → `Maitreya LaraX`.
