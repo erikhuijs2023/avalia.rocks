@@ -85,8 +85,10 @@ try {
   # Replacing the html/ DIRECTORY (mv) would break Docker's bind mount — it
   # holds the original inode. Instead, wipe + copy contents so the inode
   # survives. The ~ms-long empty window is acceptable for a static site.
+  # sudo: the avalia-builder container rsyncs as root, so html/ contents are
+  # root-owned whenever the webhook deployed last.
   Step 'Replacing html/ contents (preserves the bind mount inode)...'
-  $swap = "set -e; cd $RemoteRoot; rm -rf html/* html/.[!.]* 2>/dev/null || true; cp -a html.new/. html/; rm -rf html.new"
+  $swap = "sudo sh -c 'set -e; cd $RemoteRoot; rm -rf html/* html/.[!.]* 2>/dev/null || true; cp -a html.new/. html/; rm -rf html.new'"
   ssh $SshHost $swap
   if ($LASTEXITCODE -ne 0) { throw 'replace failed' }
   Ok 'live'
