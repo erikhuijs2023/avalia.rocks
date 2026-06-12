@@ -41,7 +41,9 @@ publishes (publishing triggers the site rebuild automatically).
      --short "<teaser>" --desc "<html>" \
      --features "<f1>|<f2>" --compat "<c1>,<c2>"
    ```
-   (`--publish` only when the user explicitly asked to publish directly.)
+   (`--publish` only when the user explicitly asked to publish directly.
+   The release date is taken from the poster file's modified time
+   automatically; pass `--date <ISO>` only to override it.)
 4. Move processed images to `inbox/done/` so a re-run can't duplicate them.
 5. Report a table: image → product name, category, merk, compat, draft/published.
    Remind the user: add the **marketplace URL** in Directus and flip status to

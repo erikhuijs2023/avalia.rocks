@@ -17,7 +17,7 @@
  * Auth: DIRECTUS_URL + DIRECTUS_CONTENT_TOKEN from the repo .env
  * (content-bot user — create/read on producten, categorieen, files only).
  */
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { basename, extname, resolve } from 'node:path';
 
 // ---- tiny .env loader (no dependency, tolerant of BOM/quotes) --------------
@@ -70,6 +70,13 @@ const desc = arg('desc', '');
 const features = String(arg('features', '')).split('|').map((s) => s.trim()).filter(Boolean);
 const compat = String(arg('compat', '')).split(',').map((s) => s.trim()).filter(Boolean);
 const publish = arg('publish', false) === true;
+// Release date: --date override, else the poster file's modified time —
+// the poster is typically exported when the product ships, so its mtime
+// is the closest thing to the real release date.
+const dateArg = arg('date', null);
+const publicatiedatum = dateArg
+  ? new Date(dateArg).toISOString()
+  : (await stat(file)).mtime.toISOString();
 
 // ---- 1. upload the poster ---------------------------------------------------
 const buf = await readFile(file);
@@ -129,8 +136,8 @@ const product = await api('/items/producten', {
     marketplace_url: '',
     is_featured: false,
     is_nieuw: true,
-    publicatiedatum: new Date().toISOString(),
+    publicatiedatum,
     afbeelding: fileId
   })
 });
-console.log(`product #${product.data.id} "${name}" (${slug}) — ${publish ? 'PUBLISHED' : 'draft'}`);
+console.log(`product #${product.data.id} "${name}" (${slug}) — ${publish ? 'PUBLISHED' : 'draft'}, released ${publicatiedatum.slice(0, 10)}`);
