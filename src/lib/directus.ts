@@ -9,7 +9,7 @@
  */
 
 import type {
-  Categorie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem
+  Categorie, Collectie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem
 } from '../data/mock';
 
 const DIRECTUS_URL = (import.meta.env.DIRECTUS_URL || 'http://192.168.178.29:8085').replace(/\/$/, '');
@@ -75,6 +75,7 @@ export function directusAsset(
 // Raw Directus row shapes (just the fields we read)
 // ---------------------------------------------------------------------------
 interface RawCategorie { id: number; naam: string; slug: string; icoon: string | null }
+interface RawCollectie { id: number; naam: string; slug: string }
 
 interface RawProduct {
   id: number;
@@ -82,6 +83,7 @@ interface RawProduct {
   naam: string;
   slug: string;
   categorie: RawCategorie;
+  collectie: RawCollectie | null;
   merk: string | null;
   korte_beschrijving: string | null;
   uitgebreide_beschrijving: string | null;
@@ -147,6 +149,10 @@ function toCategorie(r: RawCategorie): Categorie {
   return { id: r.id, naam: r.naam, slug: r.slug, icoon: r.icoon || undefined };
 }
 
+function toCollectie(r: RawCollectie): Collectie {
+  return { id: r.id, naam: r.naam, slug: r.slug };
+}
+
 function toProduct(r: RawProduct): Product {
   const coverUrl = directusAsset(r.afbeelding);
   return {
@@ -155,6 +161,7 @@ function toProduct(r: RawProduct): Product {
     slug: r.slug,
     merk: (r.merk === 'hdm' ? 'hdm' : 'avas-lewd'),
     categorie: r.categorie ? toCategorie(r.categorie) : { id: 0, naam: '', slug: '' },
+    collectie: r.collectie ? toCollectie(r.collectie) : undefined,
     korte_beschrijving: r.korte_beschrijving || '',
     uitgebreide_beschrijving: r.uitgebreide_beschrijving || '',
     afbeeldingen: coverUrl ? [coverUrl] : [],
@@ -218,7 +225,14 @@ export async function getCategorieen(): Promise<Categorie[]> {
   return raw.map(toCategorie);
 }
 
-const PRODUCT_FIELDS = '*,categorie.id,categorie.naam,categorie.slug,categorie.icoon';
+export async function getCollecties(): Promise<Collectie[]> {
+  const raw = await api<RawCollectie[]>('/items/collecties?sort=naam');
+  return raw.map(toCollectie);
+}
+
+const PRODUCT_FIELDS =
+  '*,categorie.id,categorie.naam,categorie.slug,categorie.icoon' +
+  ',collectie.id,collectie.naam,collectie.slug';
 
 export async function getProducten(): Promise<Product[]> {
   const raw = await api<RawProduct[]>(
@@ -333,4 +347,4 @@ export async function getSite(): Promise<SiteInstellingen> {
 // Re-export the types so pages can `import type { Product } from '../lib/directus'`
 // without needing the mock file at all.
 // ---------------------------------------------------------------------------
-export type { Categorie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem };
+export type { Categorie, Collectie, Product, Update, Promo, FAQItem, SiteInstellingen, GalerijItem };

@@ -259,6 +259,20 @@
   pointer-events: none;
 }
 
+/* ---------- PRODUCT FILTERS (dropdowns) ---------- */
+/* Three equal-width dropdowns (category / brand / collection) that wrap to a
+   stack on narrow screens. */
+.product-filters {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 32px 0 28px;
+}
+.product-filters .field {
+  flex: 1 1 200px;
+  margin-bottom: 0;
+}
+
 /* ---------- FILTER PILLS ---------- */
 .filter-row {
   display: flex;

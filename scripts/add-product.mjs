@@ -65,6 +65,7 @@ const name = arg('name');
 if (!file || !name) { console.error('--file and --name are required'); process.exit(1); }
 const categoryName = arg('category', '');
 const merk = arg('merk', 'avas-lewd');
+const collectionName = arg('collection', '');   // default derived from merk below
 const short = arg('short', '');
 const desc = arg('desc', '');
 const features = String(arg('features', '')).split('|').map((s) => s.trim()).filter(Boolean);
@@ -114,6 +115,21 @@ if (categoryName) {
   }
 }
 
+// ---- 2b. resolve the collection (brand-line) --------------------------------
+// Defaults to the brand's main collection (HDM products -> HDM, else Ava's
+// Lewd); --collection overrides for the special lines (e.g. LewdX). Like
+// categories, collections are deliberate — never auto-created.
+const wantedCollection = collectionName || (merk === 'hdm' ? 'HDM' : "Ava's Lewd");
+const cnorm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+const cols = await api('/items/collecties?limit=-1');
+const chit = cols.data.find((c) => cnorm(c.naam) === cnorm(wantedCollection) || c.slug === slugify(wantedCollection));
+if (!chit) {
+  console.error(`No collection matches "${wantedCollection}". Existing: ${cols.data.map((c) => c.naam).join(', ')}.`);
+  process.exit(1);
+}
+const collectieId = chit.id;
+console.log(`collection: ${chit.naam} (#${collectieId})`);
+
 // ---- 3. unique slug ----------------------------------------------------------
 let slug = slugify(name);
 const taken = await api(`/items/producten?filter[slug][_starts_with]=${slug}&fields=slug&limit=-1`);
@@ -129,6 +145,7 @@ const product = await api('/items/producten', {
     slug,
     merk,
     ...(categorieId ? { categorie: categorieId } : {}),
+    collectie: collectieId,
     korte_beschrijving: short,
     uitgebreide_beschrijving: desc,
     features: features.map((item) => ({ item })),

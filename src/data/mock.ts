@@ -13,6 +13,14 @@ export interface Categorie {
   icoon?: string;
 }
 
+/** Brand-line grouping (Ava's Lewd, LewdX, Lewd vs. HDM, HDM) — orthogonal to
+ *  categorie and merk. Drives the collection filter on /products. */
+export interface Collectie {
+  id: number;
+  naam: string;
+  slug: string;
+}
+
 export type Merk = 'avas-lewd' | 'hdm';
 
 export interface Product {
@@ -21,6 +29,7 @@ export interface Product {
   slug: string;
   merk: Merk;                              // sub-brand; not rendered on the product page
   categorie: Categorie;
+  collectie?: Collectie;                   // brand-line; optional, drives the collection filter
   korte_beschrijving: string;
   uitgebreide_beschrijving: string;       // accepts HTML
   afbeeldingen: string[];                  // resolved URLs (Directus -> directusAsset)

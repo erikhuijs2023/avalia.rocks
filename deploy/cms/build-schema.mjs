@@ -173,6 +173,20 @@ async function buildCategorieen() {
   await ensureField('categorieen', 'icoon', f.string());
 }
 
+// ---- 1b. Collecties --------------------------------------------------------
+// Brand-line groupings (Ava's Lewd, LewdX, Lewd vs. HDM, HDM) — orthogonal to
+// categorie (product type) and merk. Drives the collection filter on /products
+// and, later, per-collection landing pages.
+async function buildCollecties() {
+  console.log('\n[1b] collecties');
+  await ensureCollection('collecties', {
+    meta: { icon: 'collections_bookmark', display_template: '{{naam}}', sort_field: 'naam', collection: 'collecties' },
+    schema: {}
+  });
+  await ensureField('collecties', 'naam', f.string({ required: true }));
+  await ensureField('collecties', 'slug', f.slug());
+}
+
 // ---- 2. Producten ----------------------------------------------------------
 async function buildProducten() {
   console.log('\n[2/6] producten');
@@ -216,6 +230,13 @@ async function buildProducten() {
   await ensureField('producten', 'categorie', f.m2o());
   await ensureRelation({
     collection: 'producten', field: 'categorie', related_collection: 'categorieen',
+    meta: { sort_field: null }, schema: { on_delete: 'SET NULL' }
+  });
+  // Brand-line grouping (see buildCollecties). m2o so collections stay
+  // centrally managed and can get their own landing pages later.
+  await ensureField('producten', 'collectie', f.m2o());
+  await ensureRelation({
+    collection: 'producten', field: 'collectie', related_collection: 'collecties',
     meta: { sort_field: null }, schema: { on_delete: 'SET NULL' }
   });
   await ensureField('producten', 'korte_beschrijving', f.text());
@@ -526,6 +547,7 @@ async function buildTicketAccess() {
   for (const [collection, actions] of [
     ['producten', ['create', 'read']],
     ['categorieen', ['create', 'read']],
+    ['collecties', ['create', 'read']],
     ['galerij', ['create', 'read']],
     ['directus_files', ['create', 'read']]
   ]) {
@@ -562,6 +584,7 @@ async function setPublicPermissions() {
 
   const wanted = [
     { collection: 'categorieen', action: 'read', fields: '*' },
+    { collection: 'collecties', action: 'read', fields: '*' },
     { collection: 'producten', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
     { collection: 'updates', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
     { collection: 'galerij', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
@@ -595,6 +618,7 @@ async function setPublicPermissions() {
   console.log('  ✓ logged in');
 
   await buildCategorieen();
+  await buildCollecties();   // before producten — the collectie relation needs it
   await buildProducten();
   await buildUpdates();
   await buildPromos();

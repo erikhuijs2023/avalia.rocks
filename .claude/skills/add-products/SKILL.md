@@ -17,6 +17,13 @@ publishes (publishing triggers the site rebuild automatically).
 2. **Read each image with the Read tool** and extract:
    - **name** — the product title on the poster (e.g. "CAPRICE THONG" → "Caprice Thong").
    - **merk** — look for the brand logo: the HDM / HDM2 logo → `hdm`; otherwise → `avas-lewd`.
+   - **collection** (`--collection`) — brand-line grouping. Defaults to the
+     brand's main collection (HDM products → "HDM", else "Ava's Lewd"), so
+     usually you can omit it. Override only for the special lines: a LewdX
+     logo → `--collection LewdX`; a "Lewd vs. HDM" collab poster →
+     `--collection "Lewd vs. HDM"`. The collection must already exist (like
+     categories, never auto-created) — fetch the live list from
+     `/items/collecties` if unsure.
    - **category** — derive from the product type on the poster and match it to
      an EXISTING category (fetch the live list: `/items/categorieen`; at the
      time of writing: Heels, Boots, Jackets, Tops, Belt and garters,

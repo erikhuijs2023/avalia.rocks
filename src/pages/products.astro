@@ -1,35 +1,51 @@
 ---
 /**
- * /products — overview grid with category filter pills.
- * Filtering is client-side (CategoryFilter emits `filter:change`).
+ * /products — overview grid with category / brand / collection filters.
+ * Filtering is client-side: every published product is rendered with
+ * data-category / data-merk / data-collectie, and the three dropdowns
+ * combine with AND logic.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import ProductCard from '../components/ProductCard.astro';
-import CategoryFilter from '../components/CategoryFilter.astro';
-import { getProducten, getCategorieen } from '../lib/directus';
+import Field from '../components/Field.astro';
+import { getProducten, getCategorieen, getCollecties } from '../lib/directus';
 
-const [allProducten, categorieen] = await Promise.all([getProducten(), getCategorieen()]);
-const filterOptions = [
-  { label: 'All', value: 'all' },
+const [allProducten, categorieen, collecties] = await Promise.all([
+  getProducten(), getCategorieen(), getCollecties()
+]);
+const published = allProducten.filter((p) => p.status === 'published');
+
+const categoryOptions = [
+  { label: 'All categories', value: 'all' },
   ...categorieen.map((c) => ({ label: c.naam, value: c.slug }))
 ];
-const published = allProducten.filter((p) => p.status === 'published');
+const brandOptions = [
+  { label: 'All brands', value: 'all' },
+  { label: "Ava's Lewd", value: 'avas-lewd' },
+  { label: 'HDM', value: 'hdm' }
+];
+const collectionOptions = [
+  { label: 'All collections', value: 'all' },
+  ...collecties.map((c) => ({ label: c.naam, value: c.slug }))
+];
 ---
 <BaseLayout title="Products — Avalia" active="products">
 
   <Section eyebrow="Shop" title="All products">
     <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">
-      Latex wearables, HUDs, and accessories — handmade for Second Life. Use the filter to narrow by category.
+      Latex wearables, HUDs, and accessories — handmade for Second Life. Filter by category, brand or collection.
     </p>
 
-    <div style="margin:32px 0 28px">
-      <CategoryFilter options={filterOptions} active="all" scrollable />
+    <div class="product-filters">
+      <Field as="select" label="Category" name="filter-category" options={categoryOptions} value="all" />
+      <Field as="select" label="Brand" name="filter-merk" options={brandOptions} value="all" />
+      <Field as="select" label="Collection" name="filter-collectie" options={collectionOptions} value="all" />
     </div>
 
     <div class="av-grid av-grid-3" id="product-grid">
       {published.map((p) => (
-        <div data-category={p.categorie.slug}>
+        <div data-category={p.categorie.slug} data-merk={p.merk} data-collectie={p.collectie?.slug || ''}>
           <ProductCard
             name={p.naam}
             href={`/products/${p.slug}`}
@@ -43,7 +59,7 @@ const published = allProducten.filter((p) => p.status === 'published');
     </div>
 
     <p id="product-empty" style="display:none;margin-top:32px;color:var(--text-secondary);text-align:center">
-      Nothing in this category yet — check back soon.
+      No products match these filters — try widening them.
     </p>
   </Section>
 
@@ -52,18 +68,23 @@ const published = allProducten.filter((p) => p.status === 'published');
       var grid = document.getElementById('product-grid');
       var empty = document.getElementById('product-empty');
       if (!grid) return;
-      function apply(value) {
-        var visible = 0;
+      var fCat = document.getElementById('filter-category');
+      var fMerk = document.getElementById('filter-merk');
+      var fCol = document.getElementById('filter-collectie');
+      function val(s) { return s && s.value ? s.value : 'all'; }
+      function apply() {
+        var c = val(fCat), m = val(fMerk), col = val(fCol), visible = 0;
         grid.querySelectorAll('[data-category]').forEach(function (el) {
-          var show = value === 'all' || el.getAttribute('data-category') === value;
+          var show =
+            (c === 'all' || el.getAttribute('data-category') === c) &&
+            (m === 'all' || el.getAttribute('data-merk') === m) &&
+            (col === 'all' || el.getAttribute('data-collectie') === col);
           el.style.display = show ? '' : 'none';
           if (show) visible++;
         });
         if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
       }
-      document.addEventListener('filter:change', function (e) {
-        apply((e.detail && e.detail.value) || 'all');
-      });
+      [fCat, fMerk, fCol].forEach(function (s) { if (s) s.addEventListener('change', apply); });
     })();
   </script>
 
