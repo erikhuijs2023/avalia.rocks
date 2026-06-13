@@ -31,9 +31,7 @@ const site = await getSite();
         <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
         <Field label="Brand" name="brand" as="select"
                options={["Ava's Lewd", 'HDM']} />
-        <Field label="Subject" name="subject" as="select"
-               options={['General', 'Collaboration', 'Support', 'Other']} />
-        <Field label="Message" name="message" as="textarea" placeholder="What's on your mind?" required />
+        <Field label="Message" name="message" as="textarea" placeholder="How can I help?" required />
 
         {/* Honeypot — real users never see this; bots fill it and get filtered. */}
         <input type="text" name="website" tabindex="-1" autocomplete="off"
@@ -48,6 +46,33 @@ const site = await getSite();
   </Section>
 
   <script is:inline>
+    // Prefill the brand from ?brand= (e.g. the HDM page links here as
+    // /contact?brand=HDM). Updates the native <select> + the skinned dropdown
+    // directly so it's independent of the custom-select init timing.
+    (function () {
+      try {
+        var want = new URLSearchParams(location.search).get('brand');
+        if (!want) return;
+        var sel = document.getElementById('brand');
+        if (!sel) return;
+        var match = Array.prototype.slice.call(sel.options).filter(function (o) {
+          return o.value.toLowerCase() === want.toLowerCase();
+        })[0];
+        if (!match) return;
+        sel.value = match.value;
+        var root = sel.closest('[data-cselect]');
+        if (root) {
+          var label = root.querySelector('[data-cselect-label]');
+          if (label) label.textContent = match.textContent || match.value;
+          root.querySelectorAll('[data-cselect-option]').forEach(function (o) {
+            var on = o.getAttribute('data-value') === match.value;
+            o.classList.toggle('is-active', on);
+            o.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+        }
+      } catch (e) {}
+    })();
+
     (function () {
       var form = document.getElementById('contact-form');
       var submitBtn = form && form.querySelector('button[type=submit]');

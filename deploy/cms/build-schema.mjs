@@ -457,7 +457,6 @@ async function buildTickets() {
     },
     schema: { default_value: "Ava's Lewd", is_nullable: false }
   });
-  await ensureField('tickets', 'subject', f.string({ meta: { width: 'half' } }));
   await ensureField('tickets', 'message', f.text());
   // Internal notes for whoever handles the ticket — never shown to the sender.
   await ensureField('tickets', 'notes', f.text());
@@ -471,7 +470,7 @@ async function buildTickets() {
   // existing collection's meta, so PATCH it).
   await api('/collections/tickets', {
     method: 'PATCH',
-    body: JSON.stringify({ meta: { display_template: '[{{brand}}] {{subject}} — {{name}}' } })
+    body: JSON.stringify({ meta: { display_template: '[{{brand}}] {{name}}' } })
   });
 }
 
@@ -534,7 +533,7 @@ async function buildTicketAccess() {
   // Create-only; status/notes excluded so the defaults always apply.
   await ensurePermission(intakeId, {
     collection: 'tickets', action: 'create',
-    fields: ['name', 'email', 'brand', 'subject', 'message', 'ip']
+    fields: ['name', 'email', 'brand', 'message', 'ip']
   });
 
   // -- content bot: used by the local add-products workflow ------------------

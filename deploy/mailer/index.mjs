@@ -33,13 +33,13 @@ const TICKETS_TOKEN = process.env.TICKETS_TOKEN || '';
 if (!TICKETS_TOKEN) console.warn('TICKETS_TOKEN not set — submissions will be mailed but not stored as tickets');
 
 /** Store the submission as a Directus ticket. Returns true on success. */
-async function storeTicket({ name, email, brand, subject, message, ip }) {
+async function storeTicket({ name, email, brand, message, ip }) {
   if (!TICKETS_TOKEN) return false;
   try {
     const res = await fetch(`${DIRECTUS_URL}/items/tickets`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TICKETS_TOKEN}` },
-      body: JSON.stringify({ name, email, brand, subject, message, ip }),
+      body: JSON.stringify({ name, email, brand, message, ip }),
       signal: AbortSignal.timeout(8000)
     });
     if (!res.ok) {
@@ -81,7 +81,6 @@ function rateOk(ip) {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const SUBJECT_WHITELIST = new Set(['General', 'Collaboration', 'Support', 'Other']);
 const BRAND_WHITELIST = new Set(["Ava's Lewd", 'HDM']);
 
 function badRequest(res, msg) {
@@ -143,19 +142,17 @@ const server = createServer(async (req, res) => {
   const email = String(body.email || '').trim();
   // Default to the main brand so older clients without the field still work.
   const brand = String(body.brand || "Ava's Lewd").trim();
-  const subject = String(body.subject || 'General').trim();
   const message = String(body.message || '').trim();
 
   if (!name || name.length > 200) return badRequest(res, 'name required (max 200)');
   if (!EMAIL_RE.test(email) || email.length > 200) return badRequest(res, 'valid email required');
   if (!BRAND_WHITELIST.has(brand)) return badRequest(res, 'invalid brand');
-  if (!SUBJECT_WHITELIST.has(subject)) return badRequest(res, 'invalid subject');
   if (!message || message.length > 8000) return badRequest(res, 'message required (max 8000)');
 
   // Two independent sinks: the Directus ticket (workflow) and the e-mail
   // (notification). The submission counts as accepted when EITHER lands,
   // so an SMTP hiccup can't lose a ticket and vice versa.
-  const stored = await storeTicket({ name, email, brand, subject, message, ip });
+  const stored = await storeTicket({ name, email, brand, message, ip });
 
   let mailed = false;
   try {
@@ -163,12 +160,11 @@ const server = createServer(async (req, res) => {
       from: process.env.MAIL_FROM,
       to: process.env.MAIL_TO,
       replyTo: `${name} <${email}>`,
-      subject: `[${brand} · ${subject}] from ${name}`,
+      subject: `[${brand}] Support — ${name}`,
       text:
         `Brand:   ${brand}\n` +
         `Name:    ${name}\n` +
         `Email:   ${email}\n` +
-        `Subject: ${subject}\n` +
         `IP:      ${ip}\n` +
         `Time:    ${new Date().toISOString()}\n\n` +
         `${message}\n`
