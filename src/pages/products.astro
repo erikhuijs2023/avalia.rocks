@@ -41,6 +41,9 @@ const collectionOptions = [
       <Field as="select" label="Category" name="filter-category" options={categoryOptions} value="all" />
       <Field as="select" label="Brand" name="filter-merk" options={brandOptions} value="all" />
       <Field as="select" label="Collection" name="filter-collectie" options={collectionOptions} value="all" />
+      <button type="button" id="filter-reset" class="filter-reset" aria-label="Clear all filters">
+        Clear filters<span class="filter-reset-x" aria-hidden="true">×</span>
+      </button>
     </div>
 
     <div class="av-grid av-grid-3" id="product-grid">
@@ -71,6 +74,8 @@ const collectionOptions = [
       var fCat = document.getElementById('filter-category');
       var fMerk = document.getElementById('filter-merk');
       var fCol = document.getElementById('filter-collectie');
+      var reset = document.getElementById('filter-reset');
+      var selects = [fCat, fMerk, fCol];
       function val(s) { return s && s.value ? s.value : 'all'; }
       function apply() {
         var c = val(fCat), m = val(fMerk), col = val(fCol), visible = 0;
@@ -83,8 +88,18 @@ const collectionOptions = [
           if (show) visible++;
         });
         if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+        // Reveal the reset only when at least one filter is narrowed.
+        if (reset) reset.classList.toggle('is-shown', c !== 'all' || m !== 'all' || col !== 'all');
       }
-      [fCat, fMerk, fCol].forEach(function (s) { if (s) s.addEventListener('change', apply); });
+      selects.forEach(function (s) { if (s) s.addEventListener('change', apply); });
+      if (reset) reset.addEventListener('click', function () {
+        selects.forEach(function (s) {
+          if (s && s.value !== 'all') {
+            s.value = 'all';
+            s.dispatchEvent(new Event('change', { bubbles: true }));  // skin + grid follow
+          }
+        });
+      });
     })();
   </script>
 

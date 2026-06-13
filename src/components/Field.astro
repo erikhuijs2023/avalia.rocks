@@ -97,15 +97,26 @@ const norm = options.map((o) => (typeof o === 'string' ? { label: o, value: o } 
         if (root.classList.contains('is-open')) close(); else open();
       });
 
+      // Keep the skin in sync with the underlying <select>. Covers both an
+      // option click and an external reset: set native.value + fire 'change'
+      // and the trigger label + active option follow.
+      const sync = () => {
+        const opt = panel.querySelector<HTMLButtonElement>(
+          `[data-cselect-option][data-value="${CSS.escape(native.value)}"]`
+        );
+        if (!opt) return;
+        label.textContent = opt.textContent || '';
+        panel.querySelectorAll('[data-cselect-option]').forEach((o) => {
+          const on = o === opt;
+          o.classList.toggle('is-active', on);
+          o.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      };
+      native.addEventListener('change', sync);
+
       panel.querySelectorAll<HTMLButtonElement>('[data-cselect-option]').forEach((opt) => {
         opt.addEventListener('click', () => {
-          const v = opt.dataset.value || '';
-          native.value = v;
-          label.textContent = opt.textContent || '';
-          panel.querySelectorAll('[data-cselect-option]').forEach((o) => {
-            o.classList.toggle('is-active', o === opt);
-            o.setAttribute('aria-selected', o === opt ? 'true' : 'false');
-          });
+          native.value = opt.dataset.value || '';
           native.dispatchEvent(new Event('change', { bubbles: true }));
           close();
         });

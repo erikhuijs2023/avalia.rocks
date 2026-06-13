@@ -263,6 +263,7 @@
 /* Three equal-width dropdowns (category / brand / collection) that wrap to a
    stack on narrow screens. */
 .product-filters {
+  position: relative;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
@@ -271,6 +272,44 @@
 .product-filters .field {
   flex: 1 1 200px;
   margin-bottom: 0;
+}
+/* Contextual reset — pinned to the top-right of the filter block, fades in
+   only when a filter is active so the row stays clean at rest. Absolutely
+   positioned so it never squeezes the dropdowns. */
+.filter-reset {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.filter-reset.is-shown {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.filter-reset:hover { color: var(--text-primary); }
+.filter-reset-x {
+  display: inline-grid;
+  place-items: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 11px;
+  line-height: 1;
 }
 
 /* ---------- FILTER PILLS ---------- */
