@@ -671,13 +671,26 @@ html.mm-lock { overflow: hidden; }
 }
 
 /* ---------- LIGHTBOX ---------- */
-.thumb-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .thumb {
   aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; cursor: pointer;
   border: 2px solid transparent; transition: all var(--dur) var(--ease);
 }
 .thumb.is-active { border-color: var(--accent-pink); box-shadow: var(--glow-sm); }
 .thumb:hover { box-shadow: var(--glow-sm); }
+
+/* Product detail gallery — one large cover image, optional thumb strip below.
+   The cover fills its column; clicking it opens the lightbox to zoom. */
+.product-gallery { display: flex; flex-direction: column; gap: 12px; }
+.product-gallery .pg-stage {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  cursor: zoom-in;
+}
+/* Don't pink-border the big image when the JS marks it active on click. */
+.product-gallery .pg-stage.is-active { border-color: var(--border-subtle); box-shadow: none; }
+.product-gallery .pg-stage:hover { box-shadow: var(--glow-md); }
+.product-gallery .pg-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
 .lightbox {
   position: fixed; inset: 0; z-index: 300;

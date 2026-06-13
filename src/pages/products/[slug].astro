@@ -22,7 +22,7 @@ const { slug } = Astro.params;
 const product = await productBySlug(slug!);
 if (!product) return Astro.redirect('/404');
 
-const related = await relatedProducts(product);
+const related = await relatedProducts(product, 4);
 const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 <BaseLayout title={`${product.naam} — Avalia`} active="products">
@@ -75,7 +75,7 @@ const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { 
 
   {related.length > 0 && (
     <Section eyebrow="More" title="Related products" reveal>
-      <div class="av-grid av-grid-3">
+      <div class="av-grid av-grid-4">
         {related.map((p) => (
           <ProductCard
             name={p.naam}

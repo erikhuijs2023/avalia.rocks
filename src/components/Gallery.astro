@@ -1,21 +1,34 @@
 ---
 /**
- * Gallery — thumbnail grid for the product detail page. Clicking a thumb opens
- * the global <Lightbox>. Requires <Lightbox /> present once in the Layout.
+ * Gallery — product detail image display. Shows the cover image large; when a
+ * product has extra images they appear as a small thumbnail strip below it.
+ * Every image opens the global <Lightbox> (click to zoom). Requires
+ * <Lightbox /> present once in the layout.
  *
- * <Gallery images={p.afbeeldingen.map(directusAsset)} />
+ * Most products ship with a single cover image today — the strip only renders
+ * once the m2m gallery (multiple images per product) lands.
+ *
+ * <Gallery images={p.afbeeldingen} name={p.slug} />
  */
 export interface Props {
-  images: string[];        // resolved asset URLs
+  images: string[];        // resolved asset URLs (portrait 3:4)
   name?: string;
   class?: string;
 }
 const { images = [], name = 'detail', class: cls = '' } = Astro.props;
+const [cover, ...extra] = images;
 ---
-<div class={['thumb-grid', cls].filter(Boolean).join(' ')} data-gallery={name}>
-  {images.map((src, i) => (
-    <div class={['thumb', i === 0 ? 'is-active' : ''].filter(Boolean).join(' ')}
-         data-src={src}
-         style={`background-image:url(${src});background-size:cover;background-position:center`}></div>
-  ))}
+<div class={['product-gallery', cls].filter(Boolean).join(' ')} data-gallery={name}>
+  {cover && (
+    <div class="thumb pg-stage" data-src={cover}
+         style={`background-image:url(${cover});background-size:cover;background-position:center`}></div>
+  )}
+  {extra.length > 0 && (
+    <div class="pg-strip">
+      {extra.map((src) => (
+        <div class="thumb" data-src={src}
+             style={`background-image:url(${src});background-size:cover;background-position:center`}></div>
+      ))}
+    </div>
+  )}
 </div>
