@@ -1,0 +1,58 @@
+---
+/**
+ * /hdm — landing page for the HDM (Hugo's Design) sub-brand.
+ * Text + gradient hero (reuses PromoCard's media/overlay via its slot) with a
+ * bold "HDM" wordmark, then the live grid of every published HDM product
+ * (merk === 'hdm'). Keeps the Avalia neon look for consistency.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PromoCard from '../components/PromoCard.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Button from '../components/Button.astro';
+import { getProducten } from '../lib/directus';
+
+const all = await getProducten();
+const hdm = all.filter((p) => p.merk === 'hdm' && p.status === 'published');
+---
+<BaseLayout title="HDM — Hugo's Design × Avalia" active="hdm">
+
+  <PromoCard minHeight="60vh" class="hdm-hero">
+    <span class="hdm-eyebrow">Hugo's Design</span>
+    <h1 class="hdm-wordmark text-accent">HDM</h1>
+    <p class="hdm-tagline">
+      Precision-cut latex &amp; frames — a Hugo's Design line, crafted in collaboration with Ava's Lewd.
+    </p>
+    <Button variant="primary" size="lg" href="#hdm-grid">Browse the collection</Button>
+  </PromoCard>
+
+  <Section eyebrow="Collection" title={`HDM (${hdm.length})`} id="hdm-grid" reveal>
+    <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">
+      The full HDM range — corsets, stockings, heels and more, built in PBR and non-PBR for the major mesh bodies.
+    </p>
+
+    {hdm.length > 0 ? (
+      <div class="av-grid av-grid-3" style="margin-top:28px">
+        {hdm.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    ) : (
+      <p style="color:var(--text-secondary)">Nothing here yet — check back soon.</p>
+    )}
+  </Section>
+
+  <Section tight>
+    <div style="text-align:center">
+      <Button variant="secondary" size="lg" href="/products">Browse all products</Button>
+    </div>
+  </Section>
+
+</BaseLayout>

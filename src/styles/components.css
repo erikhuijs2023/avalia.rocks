@@ -479,6 +479,31 @@
 .promo-card .promo-content h2 { font-size: 44px; margin-bottom: 10px; }
 .promo-card .promo-content p { color: var(--text-secondary); margin: 0 0 22px; font-size: 16px; }
 
+/* HDM landing hero — wordmark over the shared promo-card gradient. The "HDM"
+   acronym reads better as a bold sans logotype than the script display font. */
+.hdm-eyebrow {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.hdm-wordmark {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: clamp(56px, 9vw, 104px);
+  letter-spacing: 0.04em;
+  line-height: 0.92;
+  margin: 0 0 16px;
+}
+.hdm-tagline {
+  color: var(--text-secondary);
+  font-size: 17px;
+  max-width: 46ch;
+  margin: 0 0 26px;
+}
+
 /* Top taak blok */
 .taak {
   position: relative;
