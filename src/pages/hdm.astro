@@ -14,6 +14,7 @@ import { getProducten } from '../lib/directus';
 
 const all = await getProducten();
 const hdm = all.filter((p) => p.merk === 'hdm' && p.status === 'published');
+const hdmFeatured = hdm.filter((p) => p.is_featured);
 ---
 <BaseLayout title="HDM — Hugo's Design × Avalia" active="hdm">
 
@@ -25,6 +26,23 @@ const hdm = all.filter((p) => p.merk === 'hdm' && p.status === 'published');
     </p>
     <Button variant="primary" size="lg" href="#hdm-grid">Browse the collection</Button>
   </PromoCard>
+
+  {hdmFeatured.length > 0 && (
+    <Section eyebrow="Spotlight" title="Featured" reveal>
+      <div class="av-grid av-grid-3">
+        {hdmFeatured.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    </Section>
+  )}
 
   <Section eyebrow="Collection" title={`HDM (${hdm.length})`} id="hdm-grid" reveal>
     <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">

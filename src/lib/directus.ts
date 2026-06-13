@@ -241,9 +241,12 @@ export async function getProducten(): Promise<Product[]> {
   return raw.map(toProduct);
 }
 
-export async function featuredProducts(): Promise<Product[]> {
+/** Featured products, newest first. Pass a `merk` to scope to one brand —
+ *  the homepage shows Lewd featured, the HDM page shows HDM featured. */
+export async function featuredProducts(merk?: string): Promise<Product[]> {
+  const brand = merk ? `&filter[merk][_eq]=${encodeURIComponent(merk)}` : '';
   const raw = await api<RawProduct[]>(
-    `/items/producten?fields=${PRODUCT_FIELDS}&filter[is_featured][_eq]=true&sort=-publicatiedatum`
+    `/items/producten?fields=${PRODUCT_FIELDS}&filter[is_featured][_eq]=true${brand}&sort=-publicatiedatum`
   );
   return raw.map(toProduct);
 }

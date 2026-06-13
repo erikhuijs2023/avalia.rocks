@@ -13,7 +13,7 @@ import { activePromo, featuredProducts, publishedUpdates } from '../lib/directus
 
 const [hero, featured, updates] = await Promise.all([
   activePromo(),
-  featuredProducts(),
+  featuredProducts('avas-lewd'),   // HDM featured live on /hdm, not here
   publishedUpdates()
 ]);
 const latest = updates.slice(0, 2);
@@ -41,20 +41,22 @@ const latest = updates.slice(0, 2);
     </div>
   </Section>
 
-  <Section eyebrow="Shop" title="Featured products" viewAllHref="/products" viewAllLabel="View all products →" reveal>
-    <div class="av-grid av-grid-3">
-      {featured.map((p) => (
-        <ProductCard
-          name={p.naam}
-          href={`/products/${p.slug}`}
-          category={p.categorie.naam}
-          description={p.korte_beschrijving}
-          image={p.afbeeldingen[0]}
-          isNew={p.is_nieuw}
-        />
-      ))}
-    </div>
-  </Section>
+  {featured.length > 0 && (
+    <Section eyebrow="Shop" title="Featured products" viewAllHref="/products" viewAllLabel="View all products →" reveal>
+      <div class="av-grid av-grid-3">
+        {featured.map((p) => (
+          <ProductCard
+            name={p.naam}
+            href={`/products/${p.slug}`}
+            category={p.categorie.naam}
+            description={p.korte_beschrijving}
+            image={p.afbeeldingen[0]}
+            isNew={p.is_nieuw}
+          />
+        ))}
+      </div>
+    </Section>
+  )}
 
   <Section eyebrow="News" title="Latest updates" viewAllHref="/updates" viewAllLabel="All updates →" reveal>
     <div class="av-grid av-grid-2">
