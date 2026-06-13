@@ -727,6 +727,9 @@ html.mm-lock { overflow: hidden; }
 .thumb {
   aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; cursor: pointer;
   border: 2px solid transparent; transition: all var(--dur) var(--ease);
+  /* These carry their image as a cover background; without this a subpixel
+     rounding gap can expose the top of a repeated tile as a thin line. */
+  background-repeat: no-repeat;
 }
 .thumb.is-active { border-color: var(--accent-pink); box-shadow: var(--glow-sm); }
 .thumb:hover { box-shadow: var(--glow-sm); }
