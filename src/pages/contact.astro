@@ -29,6 +29,8 @@ const site = await getSite();
       <form id="contact-form" style="display:flex;flex-direction:column;gap:18px;margin-top:32px" novalidate>
         <Field label="Name" name="name" placeholder="Your SL name or real name" required />
         <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
+        <Field label="Brand" name="brand" as="select"
+               options={["Ava's Lewd", 'HDM']} />
         <Field label="Subject" name="subject" as="select"
                options={['General', 'Collaboration', 'Support', 'Other']} />
         <Field label="Message" name="message" as="textarea" placeholder="What's on your mind?" required />

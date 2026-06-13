@@ -445,6 +445,18 @@ async function buildTickets() {
   });
   await ensureField('tickets', 'name', f.string({ required: true }));
   await ensureField('tickets', 'email', f.string({ required: true }));
+  // Which brand the request is about — set from the contact form.
+  await ensureField('tickets', 'brand', {
+    type: 'string',
+    meta: {
+      interface: 'select-dropdown', width: 'half', special: [],
+      options: { choices: [
+        { text: "Ava's Lewd", value: "Ava's Lewd" },
+        { text: 'HDM', value: 'HDM' }
+      ]}
+    },
+    schema: { default_value: "Ava's Lewd", is_nullable: false }
+  });
   await ensureField('tickets', 'subject', f.string({ meta: { width: 'half' } }));
   await ensureField('tickets', 'message', f.text());
   // Internal notes for whoever handles the ticket — never shown to the sender.
@@ -454,6 +466,12 @@ async function buildTickets() {
     type: 'timestamp',
     meta: { interface: 'datetime', width: 'half', readonly: true, special: ['date-created'] },
     schema: { is_nullable: true }
+  });
+  // Surface the brand in the list view (ensureCollection won't touch an
+  // existing collection's meta, so PATCH it).
+  await api('/collections/tickets', {
+    method: 'PATCH',
+    body: JSON.stringify({ meta: { display_template: '[{{brand}}] {{subject}} — {{name}}' } })
   });
 }
 
@@ -516,7 +534,7 @@ async function buildTicketAccess() {
   // Create-only; status/notes excluded so the defaults always apply.
   await ensurePermission(intakeId, {
     collection: 'tickets', action: 'create',
-    fields: ['name', 'email', 'subject', 'message', 'ip']
+    fields: ['name', 'email', 'brand', 'subject', 'message', 'ip']
   });
 
   // -- content bot: used by the local add-products workflow ------------------
