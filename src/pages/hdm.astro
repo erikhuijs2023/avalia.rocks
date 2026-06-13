@@ -2,8 +2,8 @@
 /**
  * /hdm — landing page for the HDM (Hugo's Design) sub-brand.
  * Text + gradient hero (reuses PromoCard's media/overlay via its slot) with a
- * bold "HDM" wordmark, then the live grid of every published HDM product
- * (merk === 'hdm'). Keeps the Avalia neon look for consistency.
+ * bold "HDM" wordmark + an optional "Featured" spotlight. The full catalog
+ * lives on /products?merk=hdm (the page links there) — no grid duplicated here.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
@@ -13,8 +13,7 @@ import Button from '../components/Button.astro';
 import { getProducten } from '../lib/directus';
 
 const all = await getProducten();
-const hdm = all.filter((p) => p.merk === 'hdm' && p.status === 'published');
-const hdmFeatured = hdm.filter((p) => p.is_featured);
+const hdmFeatured = all.filter((p) => p.merk === 'hdm' && p.status === 'published' && p.is_featured);
 ---
 <BaseLayout title="HDM — Hugo's Design × Avalia" active="hdm">
 
@@ -24,7 +23,7 @@ const hdmFeatured = hdm.filter((p) => p.is_featured);
     <p class="hdm-tagline">
       Precision-cut latex &amp; frames — a Hugo's Design line, crafted in collaboration with Ava's Lewd.
     </p>
-    <Button variant="primary" size="lg" href="#hdm-grid">Browse the collection</Button>
+    <Button variant="primary" size="lg" href="/products?merk=hdm">Browse the collection</Button>
   </PromoCard>
 
   {hdmFeatured.length > 0 && (
@@ -44,32 +43,9 @@ const hdmFeatured = hdm.filter((p) => p.is_featured);
     </Section>
   )}
 
-  <Section eyebrow="Collection" title={`HDM (${hdm.length})`} id="hdm-grid" reveal>
-    <p style="margin-top:-12px;color:var(--text-secondary);max-width:60ch">
-      The full HDM range — corsets, stockings, heels and more, built in PBR and non-PBR for the major mesh bodies.
-    </p>
-
-    {hdm.length > 0 ? (
-      <div class="av-grid av-grid-3" style="margin-top:28px">
-        {hdm.map((p) => (
-          <ProductCard
-            name={p.naam}
-            href={`/products/${p.slug}`}
-            category={p.categorie.naam}
-            description={p.korte_beschrijving}
-            image={p.afbeeldingen[0]}
-            isNew={p.is_nieuw}
-          />
-        ))}
-      </div>
-    ) : (
-      <p style="color:var(--text-secondary)">Nothing here yet — check back soon.</p>
-    )}
-  </Section>
-
   <Section tight>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
-      <Button variant="secondary" size="lg" href="/products">Browse all products</Button>
+      <Button variant="secondary" size="lg" href="/products?merk=hdm">Shop all HDM</Button>
       <Button variant="ghost" size="lg" href="/contact?brand=HDM">HDM support</Button>
     </div>
   </Section>

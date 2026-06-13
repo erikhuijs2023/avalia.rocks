@@ -100,6 +100,39 @@ const collectionOptions = [
           }
         });
       });
+
+      // Pre-apply filters from URL params, e.g. /products?merk=hdm (the HDM
+      // landing links here) or ?merk=avas-lewd (the homepage). Also supports
+      // ?category= and ?collectie=. Updates the native <select> + the skinned
+      // dropdown directly so it's independent of the custom-select init timing.
+      (function preApply() {
+        try {
+          var sp = new URLSearchParams(location.search);
+          var map = { category: fCat, merk: fMerk, collectie: fCol };
+          var applied = false;
+          Object.keys(map).forEach(function (key) {
+            var want = sp.get(key), sel = map[key];
+            if (!want || !sel) return;
+            var match = Array.prototype.slice.call(sel.options).filter(function (o) {
+              return o.value.toLowerCase() === want.toLowerCase();
+            })[0];
+            if (!match) return;
+            sel.value = match.value;
+            var root = sel.closest('[data-cselect]');
+            if (root) {
+              var label = root.querySelector('[data-cselect-label]');
+              if (label) label.textContent = match.textContent || match.value;
+              root.querySelectorAll('[data-cselect-option]').forEach(function (o) {
+                var on = o.getAttribute('data-value') === match.value;
+                o.classList.toggle('is-active', on);
+                o.setAttribute('aria-selected', on ? 'true' : 'false');
+              });
+            }
+            applied = true;
+          });
+          if (applied) apply();
+        } catch (e) {}
+      })();
     })();
   </script>
 
