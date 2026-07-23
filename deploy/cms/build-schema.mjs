@@ -407,7 +407,7 @@ async function buildGalerij() {
     type: 'csv',
     meta: {
       interface: 'tags', width: 'full', special: ['cast-csv'],
-      options: { presets: ['bluesky', 'instagram'] }
+      options: { presets: ['bluesky', 'instagram', 'fanvue'] }
     },
     schema: { default_value: 'bluesky', is_nullable: true }
   });
