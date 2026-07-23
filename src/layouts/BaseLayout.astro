@@ -7,6 +7,7 @@
  * Copy this into your project's src/layouts/ and adjust nav/footer/site data
  * (ideally fed from the Directus "Site Instellingen" singleton).
  */
+import '../styles/fonts.css';
 import '../styles/tokens.css';
 import '../styles/components.css';
 // interactions (age gate, lightbox, toast) ship as a static asset from /public
@@ -51,9 +52,11 @@ const site = {
       cache headers). Bump it whenever the icon artwork changes. */}
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=2" />
   <link rel="alternate icon" href="/favicon.ico?v=2" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  {/* Self-hosted fonts (see src/styles/fonts.css) — no external Google Fonts
+      request, so an ad-blocking DNS sinkhole can't stall first paint.
+      Preload the two latin subsets actually used above the fold. */}
+  <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/lobster-latin.woff2" as="font" type="font/woff2" crossorigin />
   {/* Umami analytics — privacy-friendly, no cookies. Self-hosted on
       the mini-pc behind the Unraid SWAG reverse proxy at
       stats.avalia.rocks. Skipped on `npm run dev` so local testing
