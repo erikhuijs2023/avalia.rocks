@@ -13,9 +13,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Field from '../components/Field.astro';
 import Button from '../components/Button.astro';
-import { getSite } from '../lib/directus';
-
-const site = await getSite();
 ---
 <BaseLayout title="Contact — Avalia" active="contact">
 
@@ -23,7 +20,6 @@ const site = await getSite();
     <div style="max-width:560px">
       <p style="color:var(--text-secondary);margin-top:-12px">
         Questions, collaborations, or support — drop a line and I'll get back within 48 hours.
-        Prefer email? <a href={`mailto:${site.contact_email}`} style="color:var(--text-primary)">{site.contact_email}</a>
       </p>
 
       <form id="contact-form" style="display:flex;flex-direction:column;gap:18px;margin-top:32px" novalidate>
