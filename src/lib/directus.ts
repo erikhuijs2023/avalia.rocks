@@ -153,6 +153,20 @@ function toCollectie(r: RawCollectie): Collectie {
   return { id: r.id, naam: r.naam, slug: r.slug };
 }
 
+// "New" badge window. Date-driven so the badge auto-expires — no manual
+// toggling in the CMS. NB: because the site is statically built, expiry only
+// takes visible effect on the next rebuild (content saves trigger one; a quiet
+// period may keep a stale badge until the next build).
+const NEW_WINDOW_DAYS = 21;
+
+/** Whether an item was published within the last NEW_WINDOW_DAYS. */
+function isRecentlyPublished(dateStr: string | null): boolean {
+  if (!dateStr) return false;
+  const t = Date.parse(dateStr);
+  if (Number.isNaN(t)) return false;
+  return (Date.now() - t) <= NEW_WINDOW_DAYS * 86_400_000;
+}
+
 function toProduct(r: RawProduct): Product {
   const coverUrl = directusAsset(r.afbeelding);
   return {
@@ -169,7 +183,9 @@ function toProduct(r: RawProduct): Product {
     compatibiliteit: r.compatibiliteit || [],
     marketplace_url: r.marketplace_url || '',
     is_featured: r.is_featured,
-    is_nieuw: r.is_nieuw,
+    // Display "New" is date-driven (see isRecentlyPublished) — the manual
+    // `is_nieuw` DB flag is no longer used for the badge, so it auto-expires.
+    is_nieuw: isRecentlyPublished(r.publicatiedatum),
     publicatiedatum: r.publicatiedatum || '',
     status: r.status as Product['status']
   };

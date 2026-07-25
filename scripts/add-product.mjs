@@ -152,7 +152,9 @@ const product = await api('/items/producten', {
     compatibiliteit: compat,
     marketplace_url: '',
     is_featured: false,
-    is_nieuw: true,
+    // The "New" badge is date-driven on the site (publicatiedatum within the
+    // new-window, see src/lib/directus.ts), so we no longer pin this flag.
+    is_nieuw: false,
     publicatiedatum,
     afbeelding: fileId
   })
