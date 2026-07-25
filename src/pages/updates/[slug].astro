@@ -21,7 +21,12 @@ if (!update) return Astro.redirect('/404');
 const { prev, next } = await adjacentUpdates(slug!);
 const pubDate = new Date(update.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
-<BaseLayout title={`${update.titel} — Avalia`} active="updates">
+<BaseLayout
+  title={`${update.titel} — Avalia`}
+  active="updates"
+  description={update.excerpt}
+  image={update.afbeelding}
+>
 
   <Section>
     <article style="max-width:720px;margin:0 auto">

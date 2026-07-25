@@ -21,8 +21,14 @@ import { getSite } from '../lib/directus';
 export interface Props {
   title?: string;
   active?: string;
+  /** Page meta description; falls back to the site tagline. */
+  description?: string;
+  /** Social-share image. Absolute URL (e.g. a Directus asset) or a
+   *  root-relative path; resolved against `Astro.site`. Falls back to the
+   *  brand favicon so every page still yields a valid card. */
+  image?: string;
 }
-const { title = 'Avalia', active } = Astro.props;
+const { title = 'Avalia', active, description, image } = Astro.props;
 
 // Brand + tagline come from the Directus `site_instellingen` singleton so
 // you can rename the site from the CMS without a code change. Nav links and
@@ -41,6 +47,14 @@ const site = {
   ],
   social: settings.social_links
 };
+
+// SEO / social-share meta. Canonical + og:url use the current path against
+// the configured `site`. The share image is either a page-supplied one
+// (absolute Directus asset or root-relative) or the brand favicon fallback.
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const metaDescription =
+  description || settings.tagline || 'Second Life digital fashion by Avalia.';
+const ogImage = new URL(image || '/favicon.png', Astro.site).href;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -48,6 +62,20 @@ const site = {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
+  <meta name="description" content={metaDescription} />
+  <link rel="canonical" href={canonicalURL} />
+  {/* Open Graph — link previews on Bluesky, Discord, Flickr, etc. */}
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={site.brand} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:image" content={ogImage} />
+  {/* Twitter/X card */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImage} />
   {/* CMS edit-mode toggle. `?edit=1` turns on a floating "Edit in CMS" button
       (see CmsEditLink), persisted in localStorage; `?edit=0` turns it off.
       Runs in <head> so [data-edit] is set before paint — no flash. */}

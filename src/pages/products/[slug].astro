@@ -25,8 +25,28 @@ if (!product) return Astro.redirect('/404');
 
 const related = await relatedProducts(product, 4);
 const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+// Product structured data (schema.org) — helps the pages that DO surface in
+// search render richer results. No price field exists (conversion happens on
+// SL Marketplace), so `offers` is intentionally omitted to stay warning-free.
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.naam,
+  description: product.korte_beschrijving,
+  image: product.afbeeldingen.map((src) => new URL(src, Astro.site).href),
+  sku: product.slug,
+  category: product.categorie.naam,
+  brand: { '@type': 'Brand', name: product.merk === 'hdm' ? 'HDM' : "Ava's Lewd" },
+  url: new URL(`/products/${product.slug}`, Astro.site).href,
+};
 ---
-<BaseLayout title={`${product.naam} — Avalia`} active="products">
+<BaseLayout
+  title={`${product.naam} — Avalia`}
+  active="products"
+  description={product.korte_beschrijving}
+  image={product.afbeeldingen[0]}
+>
 
   <Section>
     <div class="av-grid av-grid-2" style="align-items:start">
@@ -92,5 +112,7 @@ const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { 
   )}
 
   <CmsEditLink collection="producten" id={product.id} />
+
+  <script type="application/ld+json" set:html={JSON.stringify(productSchema)} is:inline />
 
 </BaseLayout>
