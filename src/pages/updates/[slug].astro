@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Badge from '../../components/Badge.astro';
 import Button from '../../components/Button.astro';
+import CmsEditLink from '../../components/CmsEditLink.astro';
 import { publishedUpdates, updateBySlug, adjacentUpdates } from '../../lib/directus';
 
 export async function getStaticPaths() {
@@ -52,5 +53,7 @@ const pubDate = new Date(update.publicatiedatum).toLocaleDateString('en-GB', { d
       </nav>
     </article>
   </Section>
+
+  <CmsEditLink collection="updates" id={update.id} />
 
 </BaseLayout>

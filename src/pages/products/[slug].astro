@@ -9,6 +9,7 @@ import Badge from '../../components/Badge.astro';
 import Button from '../../components/Button.astro';
 import Gallery from '../../components/Gallery.astro';
 import ProductCard from '../../components/ProductCard.astro';
+import CmsEditLink from '../../components/CmsEditLink.astro';
 import { getProducten, productBySlug, relatedProducts } from '../../lib/directus';
 
 export async function getStaticPaths() {
@@ -89,5 +90,7 @@ const pubDate = new Date(product.publicatiedatum).toLocaleDateString('en-GB', { 
       </div>
     </Section>
   )}
+
+  <CmsEditLink collection="producten" id={product.id} />
 
 </BaseLayout>

@@ -48,6 +48,37 @@ const site = {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
+  {/* CMS edit-mode toggle. `?edit=1` turns on a floating "Edit in CMS" button
+      (see CmsEditLink), persisted in localStorage; `?edit=0` turns it off.
+      Runs in <head> so [data-edit] is set before paint — no flash. */}
+  <script is:inline>
+    (function () {
+      try {
+        var p = new URLSearchParams(location.search);
+        if (p.has('edit')) {
+          var v = p.get('edit');
+          if (v === '0' || v === 'off' || v === 'false') localStorage.removeItem('avalia_edit');
+          else localStorage.setItem('avalia_edit', '1');
+        }
+        if (localStorage.getItem('avalia_edit') === '1')
+          document.documentElement.setAttribute('data-edit', '');
+      } catch (e) {}
+    })();
+  </script>
+  <style is:global>
+    .cms-edit-link { display: none; }
+    html[data-edit] .cms-edit-link {
+      display: inline-flex; align-items: center; gap: 7px;
+      position: fixed; right: 18px; bottom: 18px; z-index: 60;
+      padding: 10px 16px; border-radius: 999px;
+      background: var(--accent-gradient); color: #fff;
+      font: 600 14px/1 var(--font-body, system-ui);
+      text-decoration: none; box-shadow: var(--glow-md, 0 6px 20px rgba(0,0,0,.4));
+      border: 1px solid rgba(255,255,255,.22);
+      transition: filter .15s ease, transform .15s ease;
+    }
+    html[data-edit] .cms-edit-link:hover { filter: brightness(1.12); transform: translateY(-1px); }
+  </style>
   {/* ?v= busts the browser's dedicated favicon cache (which ignores normal
       cache headers). Bump it whenever the icon artwork changes. */}
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=2" />

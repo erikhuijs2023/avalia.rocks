@@ -1,0 +1,28 @@
+---
+/**
+ * CmsEditLink — floating "Edit in CMS" button that deep-links to the Directus
+ * edit form for the item shown on the current page. Because the site is on the
+ * same parent domain as the CMS (*.avalia.rocks), a click lands you on the
+ * already-authenticated edit form.
+ *
+ * Hidden by default. Toggle edit mode with `?edit=1` (persists in localStorage);
+ * `?edit=0` clears it. The toggle script + styling live in BaseLayout so the
+ * button works on every page that renders this component.
+ *
+ * <CmsEditLink collection="producten" id={product.id} />
+ */
+export interface Props {
+  collection: string;    // Directus collection, e.g. 'producten' | 'updates'
+  id: number | string;   // item primary key
+  label?: string;
+}
+const { collection, id, label = 'Edit in CMS' } = Astro.props;
+
+// Public admin URL — distinct from the build-time DIRECTUS_URL (which may be a
+// LAN address). Override via PUBLIC_CMS_URL if the admin host ever changes.
+const CMS = (import.meta.env.PUBLIC_CMS_URL || 'https://cms.avalia.rocks').replace(/\/$/, '');
+const href = `${CMS}/admin/content/${collection}/${id}`;
+---
+<a class="cms-edit-link" href={href} target="_blank" rel="noopener noreferrer" data-cms-edit>
+  <span aria-hidden="true">✎</span> {label}
+</a>
