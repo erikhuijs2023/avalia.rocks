@@ -444,7 +444,10 @@ async function buildTickets() {
     schema: { default_value: 'new', is_nullable: false }
   });
   await ensureField('tickets', 'name', f.string({ required: true }));
-  await ensureField('tickets', 'email', f.string({ required: true }));
+  // Optional: the contact form lets people leave it blank and get a reply
+  // in-world. Existing installs keep their NOT NULL column — the mailer posts
+  // an empty string rather than null, which satisfies it either way.
+  await ensureField('tickets', 'email', f.string());
   // Which brand the request is about — set from the contact form.
   await ensureField('tickets', 'brand', {
     type: 'string',

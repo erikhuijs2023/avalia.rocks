@@ -145,7 +145,9 @@ const server = createServer(async (req, res) => {
   const message = String(body.message || '').trim();
 
   if (!name || name.length > 200) return badRequest(res, 'name required (max 200)');
-  if (!EMAIL_RE.test(email) || email.length > 200) return badRequest(res, 'valid email required');
+  // Email is optional (the form says we reply in-world) — validate only when
+  // one was supplied, so a typo still gets caught.
+  if (email && (!EMAIL_RE.test(email) || email.length > 200)) return badRequest(res, 'valid email required');
   if (!BRAND_WHITELIST.has(brand)) return badRequest(res, 'invalid brand');
   if (!message || message.length > 8000) return badRequest(res, 'message required (max 8000)');
 
@@ -159,18 +161,20 @@ const server = createServer(async (req, res) => {
     const mail = await transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: process.env.MAIL_TO,
-      replyTo: `${name} <${email}>`,
+      // No address supplied → omit Reply-To entirely; `Name <>` is an invalid
+      // header. Those senders get answered in-world.
+      ...(email ? { replyTo: `${name} <${email}>` } : {}),
       subject: `[${brand}] Support — ${name}`,
       text:
         `Brand:   ${brand}\n` +
         `Name:    ${name}\n` +
-        `Email:   ${email}\n` +
+        `Email:   ${email || '(none — reply in-world)'}\n` +
         `IP:      ${ip}\n` +
         `Time:    ${new Date().toISOString()}\n\n` +
         `${message}\n`
     });
     mailed = true;
-    console.log(`[ok] ${ip} -> ${email} (id ${mail.messageId}, ticket ${stored ? 'stored' : 'NOT stored'})`);
+    console.log(`[ok] ${ip} -> ${email || 'no-email'} (id ${mail.messageId}, ticket ${stored ? 'stored' : 'NOT stored'})`);
   } catch (err) {
     console.error(`[smtp] ${err.message} (ticket ${stored ? 'stored' : 'NOT stored'})`);
   }

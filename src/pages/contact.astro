@@ -19,12 +19,13 @@ import Button from '../components/Button.astro';
   <Section eyebrow="Contact" title="Get in touch">
     <div style="max-width:560px">
       <p style="color:var(--text-secondary);margin-top:-12px">
-        Questions, collaborations, or support — drop a line and I'll get back within 48 hours.
+        Questions or support — drop a line and I'll get back within 24 hours.
+        You don't have to fill out an email address. We'll always try to contact you in-world!
       </p>
 
       <form id="contact-form" style="display:flex;flex-direction:column;gap:18px;margin-top:32px" novalidate>
         <Field label="Name" name="name" placeholder="Your SL name or real name" required />
-        <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
+        <Field label="Email (optional)" name="email" type="email" placeholder="you@example.com" />
         <Field label="Brand" name="brand" as="select"
                options={["Ava's Lewd", 'HDM']} />
         <Field label="Message" name="message" as="textarea" placeholder="How can I help?" required />
@@ -82,8 +83,9 @@ import Button from '../components/Button.astro';
         e.preventDefault();
         var data = Object.fromEntries(new FormData(form).entries());
 
-        if (!data.name || !data.email || !data.message) {
-          toast('info', 'Missing fields', 'Please fill in name, email, and a message.');
+        // Email is optional — we reply in-world when it's left blank.
+        if (!data.name || !data.message) {
+          toast('info', 'Missing fields', 'Please fill in your name and a message.');
           return;
         }
 
@@ -97,17 +99,17 @@ import Button from '../components/Button.astro';
           });
           var body = await res.json().catch(function () { return {}; });
           if (res.ok && body.ok) {
-            toast('success', 'Message sent', 'Thanks — I\'ll reply within 48 hours.');
+            toast('success', 'Message sent', 'Thanks — I\'ll reply within 24 hours.');
             form.reset();
           } else if (res.status === 429) {
             toast('info', 'Too many submits', 'Please wait a bit before trying again.');
           } else {
-            toast('info', 'Could not send', body.error || 'Please try again, or email directly.');
+            toast('info', 'Could not send', body.error || 'Please try again, or catch me in-world.');
           }
         } catch (err) {
           // No backend reachable (dev mode, or mailer down) — degrade gracefully.
           console.log('[contact] fetch failed:', err);
-          toast('info', 'Send unavailable', 'Try again later, or email directly.');
+          toast('info', 'Send unavailable', 'Try again later, or catch me in-world.');
         } finally {
           if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send message'; }
         }
