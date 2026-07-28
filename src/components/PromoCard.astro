@@ -45,13 +45,17 @@ const objectPosition = focal || 'center';
       </div>
     : <div class="media"></div>}
   <div class="promo-overlay"></div>
+  <!-- .promo-content spans the container width so the copy lines up with the
+       sections below; .promo-measure keeps the text column readable. -->
   <div class="promo-content">
-    {featured && <Badge variant="featured" class="" />}
-    <h2 style="margin-top:14px">{title}</h2>
-    {description && <p>{description}</p>}
-    {ctaText && ctaUrl && (
-      <Button variant="primary" size="lg" href={ctaUrl} external={ctaExternal}>{ctaText}</Button>
-    )}
-    <slot />
+    <div class="promo-measure">
+      {featured && <Badge variant="featured" class="" />}
+      <h2 style="margin-top:14px">{title}</h2>
+      {description && <p>{description}</p>}
+      {ctaText && ctaUrl && (
+        <Button variant="primary" size="lg" href={ctaUrl} external={ctaExternal}>{ctaText}</Button>
+      )}
+      <slot />
+    </div>
   </div>
 </article>
