@@ -62,7 +62,18 @@ for dir in "$SITES_ROOT"/*/; do
   name=$(basename "$dir")
   cd "$dir"
 
-  expected=$(docker compose config --services 2>/dev/null | wc -l | tr -d ' ')
+  # A stack whose compose file can't even be parsed must not be run through
+  # down/up — that just churns and reports a count of 0/0 with no clue why.
+  # avalia-pics is the first project here to use required variables
+  # (${SESSION_SECRET:?...}), so a missing or unreadable .env now shows up as
+  # a config error rather than a mysteriously empty service list.
+  if ! services=$(docker compose config --services 2>&1); then
+    log "$name  ERROR: compose config failed — $(printf '%s' "$services" | tr '\n' ' ' | cut -c1-160)"
+    fail=$(( fail + 1 ))
+    continue
+  fi
+
+  expected=$(printf '%s\n' "$services" | grep -c . || true)
   running=$(docker compose ps --status running --quiet 2>/dev/null | wc -l | tr -d ' ')
   restarting=$(docker compose ps --status restarting --quiet 2>/dev/null | wc -l | tr -d ' ')
 

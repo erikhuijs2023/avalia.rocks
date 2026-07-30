@@ -55,19 +55,31 @@ Docker is responding
 avalia            OK (3/3 up)
 avalia-cms        OK (2/2 up)
 avalia-analytics  OK (2/2 up)
+avalia-pics       OK (2/2 up)
 hugosdesign       OK (2/2 up)
 test              OK (1/1 up)
 destemvansylvie   OK (1/1 up)
 done — all stacks healthy
 ```
 
+There is no list of projects to maintain: the script globs
+`/opt/sites/*/` and covers any directory holding a `docker-compose.yml`.
+A new stack is picked up the moment its directory exists.
+
 If a stack is unhealthy it logs `recreating (running=X expected=Y …)`
 and runs `down + up` for that project only.
+
+If its compose file can't be parsed at all — almost always a missing or
+incomplete `.env` — it logs `ERROR: compose config failed` with the reason
+and moves on, rather than churning through down/up to no effect. Stacks
+with required variables (`avalia-pics` needs `SESSION_SECRET` and
+`ORIGINALS_DIR`) fail this way when their `.env` is absent.
 
 ## What it doesn't do
 
 - It does not touch stacks outside `/opt/sites/`.
 - It does not rebuild images. If a build context changed (e.g. you edited
   `deploy/mailer/`) you still need to deploy via `deploy.ps1 -Infra`.
-- It does not solve permanent failures — if a stack's `.env` is broken,
-  it'll keep cycling through down/up and report failure.
+- It does not solve permanent failures. A broken `.env` is reported and
+  skipped; a stack that starts and then crashes will be recreated on every
+  boot without ever becoming healthy.
