@@ -57,3 +57,27 @@ services:
       GIT_BRANCH:   ${GIT_BRANCH:-main}
       DIRECTUS_URL: ${DIRECTUS_URL:-http://192.168.178.29:8085}
       DEBOUNCE_MS:  ${DEBOUNCE_MS:-10000}
+
+  # Sends an SL group notice for one update, via the SmartBots API. Triggered
+  # BY HAND from a "Send group notice" button in Directus — never on save, a
+  # notice can't be recalled. Source + docs in deploy/notifier/ in the repo.
+  notifier:
+    build: ./notifier
+    image: avalia-notifier:latest
+    container_name: avalia-notifier
+    restart: unless-stopped
+    ports:
+      - "192.168.178.29:8088:8088"
+    environment:
+      NOTICE_TOKEN:   ${NOTICE_TOKEN:?set NOTICE_TOKEN}
+      SB_APIKEY:      ${SB_APIKEY:?set SB_APIKEY}
+      SB_BOTNAME:     ${SB_BOTNAME:?set SB_BOTNAME}
+      SB_SECRET:      ${SB_SECRET:?set SB_SECRET}
+      SB_GROUP_UUID:  ${SB_GROUP_UUID:?set SB_GROUP_UUID}
+      NOTIFIER_TOKEN: ${NOTIFIER_TOKEN:?set NOTIFIER_TOKEN}
+      DIRECTUS_URL:   ${DIRECTUS_URL:-http://192.168.178.29:8085}
+      SITE_URL:       ${SITE_URL:-https://avalia.rocks}
+      SUBJECT_MAX:    ${SUBJECT_MAX:-63}
+      SB_ATTACHMENT:  ${SB_ATTACHMENT:-}
+      SB_FOLDER_UUID: ${SB_FOLDER_UUID:-}
+      IMAGE_MAX:      ${IMAGE_MAX:-1024}

@@ -15,7 +15,7 @@
   just the upload step.
 
 .PARAMETER Infra
-  Also push docker-compose.yml, nginx.conf and the mailer/ source, then
+  Also push docker-compose.yml, nginx.conf and the mailer/builder/notifier source, then
   `docker compose up -d --build`. Use after editing infra-side code.
 
 .EXAMPLE
@@ -42,13 +42,15 @@ Push-Location $RepoRoot
 try {
   # 0. Infra sync (optional) --------------------------------------------------
   if ($Infra) {
-    Step 'Syncing infra files (compose, nginx, mailer/)...'
+    Step 'Syncing infra files (compose, nginx, mailer/, builder/, notifier/)...'
     scp deploy/site/docker-compose.yml deploy/site/nginx.conf "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'infra scp (compose+nginx) failed' }
     scp -r deploy/mailer "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'infra scp (mailer) failed' }
     scp -r deploy/builder "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'infra scp (builder) failed' }
+    scp -r deploy/notifier "${SshHost}:${RemoteRoot}/" 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'infra scp (notifier) failed' }
     Ok 'uploaded'
 
     Step 'docker compose up -d --build ...'

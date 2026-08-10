@@ -1,0 +1,14 @@
+{
+  "name": "avalia-notifier",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Sends a Second Life group notice for a published Avalia update, via the SmartBots HTTP API. Triggered by hand from a Directus flow button.",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

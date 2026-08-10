@@ -315,6 +315,36 @@ async function buildUpdates() {
       options: { placeholder: 'Visit in Second Life' }
     }
   }));
+  // -- SL group notice (deploy/notifier) --------------------------------------
+  // A notice carries ~512 BYTES of text, so this is the one field that decides
+  // whether the notice reads well. Keep it to a hook plus the reason to come;
+  // the link does the rest of the work.
+  await ensureField('updates', 'notice_text', f.text({
+    meta: {
+      note: 'Group-notice body. Kort en bondig: 1-2 zinnen, max ~350 tekens — SL knipt op 512 BYTES ' +
+            '(accenten en emoji tellen voor 2-4). Wat + wanneer + waar, de link wordt automatisch ' +
+            'onderaan gezet. Leeg = de excerpt wordt gebruikt.',
+      options: { placeholder: 'Nieuwe drop live bij Ava’s Lewd — dit weekend 25% korting in de store.' }
+    }
+  }));
+  await ensureField('updates', 'notice_attachment_uuid', f.string({
+    meta: {
+      width: 'half',
+      note: 'Optioneel. Inventory-UUID (niet asset-UUID) van een item in de inventory van de SmartBots-bot: ' +
+            'landmark, texture of notecard. Zet je hem zelf, dan wint hij altijd. Laat leeg om de ' +
+            'notifier het te laten regelen — die vult hem in met de texture/notecard die hij uploadt.'
+    }
+  }));
+  await ensureField('updates', 'notice_sent_at', {
+    type: 'timestamp',
+    meta: { interface: 'datetime', width: 'half', readonly: true, note: 'Gezet door de notifier. Leeg = nog geen notice verstuurd.' },
+    schema: { is_nullable: true }
+  });
+  await ensureField('updates', 'notice_status', {
+    type: 'string',
+    meta: { interface: 'input', width: 'half', readonly: true, note: 'Laatste antwoord van SmartBots.' },
+    schema: { is_nullable: true }
+  });
   await ensureField('updates', 'publicatiedatum', f.datetime());
   await ensureField('updates', 'afbeelding', f.imageRef());
   await ensureRelation({
@@ -592,6 +622,46 @@ async function buildTicketAccess() {
     }
   }
 
+  // -- notice bot: used by deploy/notifier to send SL group notices ----------
+  // Reads updates (to build the notice) and writes back only the two send-log
+  // fields. It cannot publish, edit copy, or touch any other collection — the
+  // worst a leaked token can do is read published-ish updates and lie about
+  // when a notice went out.
+  const NOTICE_BOT_EMAIL = 'notice-bot@avalia.rocks';
+  const NOTIFIER_TOKEN = process.env.NOTIFIER_TOKEN;
+  const nUsers = await api(`/users?filter[email][_eq]=${encodeURIComponent(NOTICE_BOT_EMAIL)}`);
+  let noticeBotId = nUsers.data[0]?.id;
+  if (!noticeBotId) {
+    const r = await api('/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: NOTICE_BOT_EMAIL, first_name: 'Notice', last_name: 'Bot',
+        status: 'active', ...(NOTIFIER_TOKEN ? { token: NOTIFIER_TOKEN } : {})
+      })
+    });
+    noticeBotId = r.data.id;
+    console.log(`  + user ${NOTICE_BOT_EMAIL}`);
+  } else if (NOTIFIER_TOKEN) {
+    await api(`/users/${noticeBotId}`, { method: 'PATCH', body: JSON.stringify({ token: NOTIFIER_TOKEN }) });
+    console.log(`  ~ refreshed token for ${NOTICE_BOT_EMAIL}`);
+  }
+  const noticePolicyId = await ensurePolicy('Notice Sender', {
+    app_access: false, admin_access: false, users: [{ user: noticeBotId }]
+  });
+  await ensurePermission(noticePolicyId, {
+    collection: 'updates', action: 'read',
+    fields: ['id', 'status', 'titel', 'slug', 'excerpt', 'content', 'link_url', 'afbeelding',
+             'notice_text', 'notice_attachment_uuid', 'notice_sent_at', 'notice_status']
+  });
+  // notice_attachment_uuid is writable so an uploaded texture/notecard is
+  // remembered and a resend reuses it instead of uploading a second copy.
+  await ensurePermission(noticePolicyId, {
+    collection: 'updates', action: 'update',
+    fields: ['notice_sent_at', 'notice_status', 'notice_attachment_uuid']
+  });
+  // Reading the image bytes to upload as a texture.
+  await ensurePermission(noticePolicyId, { collection: 'directus_files', action: 'read', fields: ['*'] });
+
   // -- Support role: for the human admin handling tickets --------------------
   const supportRoleId = await ensureRole('Support', { icon: 'support_agent' });
   const supportPolicyId = await ensurePolicy('Support Tickets', {
@@ -622,7 +692,12 @@ async function setPublicPermissions() {
     { collection: 'categorieen', action: 'read', fields: '*' },
     { collection: 'collecties', action: 'read', fields: '*' },
     { collection: 'producten', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
-    { collection: 'updates', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
+    // Explicit field list, not '*': the notice_* columns are operational
+    // (bot inventory UUIDs, send log) and have no business in a public feed.
+    { collection: 'updates', action: 'read',
+      fields: ['id', 'status', 'titel', 'slug', 'excerpt', 'content', 'tags',
+               'link_url', 'link_label', 'publicatiedatum', 'afbeelding'],
+      permissions: { status: { _eq: 'published' } } },
     { collection: 'galerij', action: 'read', fields: '*', permissions: { status: { _eq: 'published' } } },
     { collection: 'promos', action: 'read', fields: '*', permissions: { actief: { _eq: true } } },
     { collection: 'site_instellingen', action: 'read', fields: '*' },
