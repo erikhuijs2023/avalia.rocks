@@ -74,6 +74,7 @@ services:
       SB_BOTNAME:     ${SB_BOTNAME:?set SB_BOTNAME}
       SB_SECRET:      ${SB_SECRET:?set SB_SECRET}
       SB_GROUP_UUID:  ${SB_GROUP_UUID:?set SB_GROUP_UUID}
+      SB_GROUP_TEST:  ${SB_GROUP_TEST:-}
       NOTIFIER_TOKEN: ${NOTIFIER_TOKEN:?set NOTIFIER_TOKEN}
       DIRECTUS_URL:   ${DIRECTUS_URL:-http://192.168.178.29:8085}
       SITE_URL:       ${SITE_URL:-https://avalia.rocks}

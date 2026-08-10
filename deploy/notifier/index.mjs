@@ -28,6 +28,8 @@
  *   SITE_URL         default https://avalia.rocks (fallback link + CTA)
  *   SUBJECT_MAX      default 63 (see sanitizeSubject)
  *   TEXT_MAX         default 512 (SmartBots hard limit, in BYTES)
+ *   SB_GROUP_TEST    UUID of a throwaway group; `{"test":true}` sends there
+ *                    instead, without stamping the update as notified
  *   SB_ATTACHMENT    fallback inventory UUID attached when the item has none
  *   SB_FOLDER_UUID   inventory folder for uploaded textures/notecards
  *   IMAGE_MAX        longest edge of an uploaded texture (default 1024 — SL
@@ -57,6 +59,7 @@ const NOTIFIER_TOKEN = process.env.NOTIFIER_TOKEN;
 const SITE_URL       = (process.env.SITE_URL || 'https://avalia.rocks').replace(/\/$/, '');
 const SUBJECT_MAX    = Number(process.env.SUBJECT_MAX || 63);
 const TEXT_MAX       = Number(process.env.TEXT_MAX || 512);
+const SB_GROUP_TEST  = process.env.SB_GROUP_TEST || '';
 const SB_ATTACHMENT  = process.env.SB_ATTACHMENT || '';
 const SB_FOLDER_UUID = process.env.SB_FOLDER_UUID || '';
 const IMAGE_MAX      = Number(process.env.IMAGE_MAX || 1024);
@@ -279,15 +282,24 @@ async function handleNotice(req, res) {
   const dry = Boolean(body.dry);
   const force = Boolean(body.force);
 
+  // Test sends go to a throwaway group and leave no trace on the item: no
+  // notice_sent_at stamp, so the real send later still works, and no guards,
+  // so you can rehearse a draft as often as you like.
+  const test = Boolean(body.test);
+  if (test && !SB_GROUP_TEST) {
+    return json(res, 400, { ok: false, error: 'test send requested but SB_GROUP_TEST is not configured' });
+  }
+  const groupuuid = test ? SB_GROUP_TEST : process.env.SB_GROUP_UUID;
+
   let u;
   try { u = await getUpdate(id); }
   catch (e) { return json(res, 502, { ok: false, error: `could not read update: ${e.message}` }); }
   if (!u) return json(res, 404, { ok: false, error: 'update not found' });
 
-  if (!force && u.status !== 'published') {
+  if (!test && !force && u.status !== 'published') {
     return json(res, 409, { ok: false, error: `update is ${u.status}, not published (use force to override)` });
   }
-  if (!force && u.notice_sent_at) {
+  if (!test && !force && u.notice_sent_at) {
     return json(res, 409, { ok: false, error: `notice already sent at ${u.notice_sent_at} (use force to resend)` });
   }
 
@@ -317,7 +329,7 @@ async function handleNotice(req, res) {
   if (dry) {
     const pending = !attachment && (attach === 'image' || attach === 'notecard');
     return json(res, 200, {
-      ok: true, dry: true, ...notice,
+      ok: true, dry: true, test, groupuuid, ...notice,
       attach, attachment: pending ? `<${attach} — created on send>` : (attachment || null)
     });
   }
@@ -334,33 +346,35 @@ async function handleNotice(req, res) {
     }
 
     await smartbots('send_notice', {
-      groupuuid: process.env.SB_GROUP_UUID,
+      groupuuid,
       subject: notice.subject,
       text: notice.text,
       autodelay: '1',
       ...(attachment ? { attachment } : {})
     });
   } catch (e) {
-    lastSend = { at: new Date().toISOString(), id, ok: false, subject: notice.subject, error: e.message };
-    console.error(`[notice] FAIL ${id}: ${e.message}`);
-    await stampUpdate(id, { notice_status: `failed: ${e.message}`.slice(0, 255) });
-    return json(res, 502, { ok: false, error: e.message });
+    lastSend = { at: new Date().toISOString(), id, test, ok: false, subject: notice.subject, error: e.message };
+    console.error(`[notice] FAIL ${id}${test ? ' (test)' : ''}: ${e.message}`);
+    if (!test) await stampUpdate(id, { notice_status: `failed: ${e.message}`.slice(0, 255) });
+    return json(res, 502, { ok: false, test, error: e.message });
   }
 
   const at = new Date().toISOString();
-  lastSend = { at, id, ok: true, subject: notice.subject, error: null };
-  console.log(`[notice] sent ${id} "${notice.subject}" (${notice.bytes}b, attach=${attach}${attachment ? ` ${attachment}` : ' none'})`);
-  await stampUpdate(id, {
-    notice_sent_at: at,
-    // SmartBots answers OK even when the bot lacks the "Send Notices" ability,
-    // so this says "accepted", not "delivered". Verify in-world after wiring.
-    notice_status: `accepted by SmartBots (attach=${attach}${attachment ? '' : ', none'})`.slice(0, 255),
-    // Remember what we made, so a resend reuses the texture/notecard instead
-    // of uploading a second copy into the bot's inventory.
-    ...(uploaded ? { notice_attachment_uuid: uploaded } : {})
-  });
+  lastSend = { at, id, test, ok: true, subject: notice.subject, error: null };
+  console.log(`[notice] sent${test ? ' TEST' : ''} ${id} "${notice.subject}" (${notice.bytes}b, attach=${attach}${attachment ? ` ${attachment}` : ' none'}) -> ${groupuuid}`);
+  if (!test) {
+    await stampUpdate(id, {
+      notice_sent_at: at,
+      // SmartBots answers OK even when the bot lacks the "Send Notices" ability,
+      // so this says "accepted", not "delivered". Verify in-world after wiring.
+      notice_status: `accepted by SmartBots (attach=${attach}${attachment ? '' : ', none'})`.slice(0, 255),
+      // Remember what we made, so a resend reuses the texture/notecard instead
+      // of uploading a second copy into the bot's inventory.
+      ...(uploaded ? { notice_attachment_uuid: uploaded } : {})
+    });
+  }
 
-  return json(res, 200, { ok: true, ...notice, attach, attachment: attachment || null, uploaded });
+  return json(res, 200, { ok: true, test, groupuuid, ...notice, attach, attachment: attachment || null, uploaded });
 }
 
 const server = createServer(async (req, res) => {
@@ -368,6 +382,7 @@ const server = createServer(async (req, res) => {
     return json(res, 200, {
       ok: true,
       group: process.env.SB_GROUP_UUID,
+      testGroup: SB_GROUP_TEST || null,
       bot: process.env.SB_BOTNAME,
       limits: { subjectMax: SUBJECT_MAX, textMaxBytes: TEXT_MAX, imageMaxPx: IMAGE_MAX },
       defaultAttachment: SB_ATTACHMENT || null,

@@ -36,7 +36,15 @@ Directus "Send group notice" button
 |----------|---------|----------------------------------------------------------------|
 | `id`     | —       | Update id (required)                                           |
 | `dry`    | `false` | Build and return the notice, send nothing. **Use this first.**  |
+| `test`   | `false` | Send to `SB_GROUP_TEST` instead, leaving no trace on the update |
 | `force`  | `false` | Send even if the update is a draft or was already notified      |
+
+`test` is the rehearsal switch: it sends a real notice with a real attachment
+to a throwaway group of your own alts, skips the draft/already-sent guards, and
+does **not** stamp `notice_sent_at` — so the real send afterwards still works,
+and you can repeat the test as often as you like. It does not record an
+uploaded texture either, so a test `attach=image` leaves one throwaway texture
+in the bot's inventory per run; that's what `SB_FOLDER_UUID` is for.
 | `attach` | `auto`  | `auto` \| `image` \| `notecard` \| `none` — see below           |
 
 ### Attachments
@@ -134,7 +142,15 @@ curl -s http://192.168.178.29:8088/health
 curl -s -X POST http://192.168.178.29:8088/notice -H "X-Avalia-Token: $NOTICE_TOKEN" -H 'Content-Type: application/json' -d '{"id":1,"dry":true}'
 ```
 
-Do the first real send against a throwaway group with only your own alts in it.
+Then a real send to the test group — this is the one that proves the bot's
+group role is right, which no dry run can tell you:
+
+```bash
+curl -s -X POST http://192.168.178.29:8088/notice -H "X-Avalia-Token: $NOTICE_TOKEN" -H 'Content-Type: application/json' -d '{"id":1,"test":true,"attach":"image"}'
+```
+
+Log in as an alt in that group and confirm the notice arrived *and* the
+attachment opens. `result=OK` from SmartBots does not prove either.
 
 ## Rate limits
 
