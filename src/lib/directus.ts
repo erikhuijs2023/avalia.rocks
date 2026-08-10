@@ -104,6 +104,8 @@ interface RawUpdate {
   content: string | null;
   excerpt: string | null;
   tags: string[] | null;
+  link_url: string | null;
+  link_label: string | null;
   publicatiedatum: string | null;
   afbeelding: string | null;
 }
@@ -200,6 +202,8 @@ function toUpdate(r: RawUpdate): Update {
     excerpt: r.excerpt || '',
     afbeelding: directusAsset(r.afbeelding),
     tags: r.tags || [],
+    link_url: r.link_url || undefined,
+    link_label: r.link_label || undefined,
     publicatiedatum: r.publicatiedatum || '',
     status: r.status as Update['status']
   };

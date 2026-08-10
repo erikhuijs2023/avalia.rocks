@@ -50,6 +50,8 @@ export interface Update {
   excerpt: string;                         // plain text, ≤500 chars (feed-safe)
   afbeelding?: string;
   tags: string[];
+  link_url?: string;                       // optional CTA, usually a SLURL
+  link_label?: string;                     // optional button text for link_url
   publicatiedatum: string;
   status: 'published' | 'draft';
 }

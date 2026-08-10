@@ -299,6 +299,22 @@ async function buildUpdates() {
   await ensureField('updates', 'excerpt', f.text());
   await ensureField('updates', 'content', f.richText());
   await ensureField('updates', 'tags', f.csvTags());
+  // Optional call-to-action. Any URL works; a SLURL (maps.secondlife.com/...)
+  // is the common case for events and store visits.
+  await ensureField('updates', 'link_url', f.string({
+    meta: {
+      width: 'half',
+      note: 'Optional. SLURL or any link for this update, e.g. https://maps.secondlife.com/secondlife/Sheer/128/128/25',
+      options: { placeholder: 'https://maps.secondlife.com/secondlife/...' }
+    }
+  }));
+  await ensureField('updates', 'link_label', f.string({
+    meta: {
+      width: 'half',
+      note: 'Optional button text. Defaults to "Visit in Second Life" when left empty.',
+      options: { placeholder: 'Visit in Second Life' }
+    }
+  }));
   await ensureField('updates', 'publicatiedatum', f.datetime());
   await ensureField('updates', 'afbeelding', f.imageRef());
   await ensureRelation({

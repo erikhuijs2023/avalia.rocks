@@ -48,6 +48,14 @@ const pubDate = new Date(update.publicatiedatum).toLocaleDateString('en-GB', { d
 
       <div style="color:var(--text-primary);line-height:1.8;font-size:17px" set:html={update.content}></div>
 
+      {update.link_url && (
+        <div style="margin-top:36px">
+          <Button variant="primary" size="lg" href={update.link_url} external>
+            {update.link_label || 'Visit in Second Life'}
+          </Button>
+        </div>
+      )}
+
       <nav style="display:flex;gap:16px;justify-content:space-between;margin-top:64px;padding-top:32px;border-top:1px solid var(--border-subtle)">
         {prev
           ? <Button variant="ghost" href={`/updates/${prev.slug}`}>← {prev.titel}</Button>
