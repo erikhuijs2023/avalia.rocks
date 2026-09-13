@@ -585,10 +585,11 @@ async function buildTicketAccess() {
     fields: ['name', 'email', 'brand', 'message', 'ip']
   });
 
-  // -- content bot: used by the local add-products workflow ------------------
+  // -- content bot: used by the local add-products + news-post workflows -----
   // Scoped token for creating products from poster images (Claude reads the
-  // posters and calls scripts/add-product.mjs). Create+read only — cannot
-  // touch tickets, settings or users.
+  // posters and calls scripts/add-product.mjs) and event news posts
+  // (scripts/add-update.mjs). Create+read only — cannot publish-edit existing
+  // items or touch tickets, settings or users.
   const CONTENT_BOT_EMAIL = 'content-bot@avalia.rocks';
   const CONTENT_TOKEN = process.env.CONTENT_TOKEN;
   const cUsers = await api(`/users?filter[email][_eq]=${encodeURIComponent(CONTENT_BOT_EMAIL)}`);
@@ -615,6 +616,8 @@ async function buildTicketAccess() {
     ['categorieen', ['create', 'read']],
     ['collecties', ['create', 'read']],
     ['galerij', ['create', 'read']],
+    // news posts from the /news-post workflow (scripts/add-update.mjs)
+    ['updates', ['create', 'read']],
     ['directus_files', ['create', 'read']]
   ]) {
     for (const action of actions) {
