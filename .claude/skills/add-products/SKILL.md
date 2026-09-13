@@ -42,6 +42,12 @@ automatically; the user adds the marketplace URL later.
      provocative, no explicit language).
    - **desc** — 1–2 short HTML paragraphs (`<p>…</p>`) in the same voice:
      what it is, what makes it good, who it fits.
+   Then **ask the user** (AskUserQuestion, Dutch, multiSelect): "Welke
+   producten moeten als featured op de frontpage?" — one option per new
+   product plus "Geen". Featured is per brand (Ava's Lewd → homepage, HDM →
+   /hdm spotlight) and each spotlight always holds exactly **3**: the new
+   picks go on, the oldest current ones come off. Picking more than 3 of one
+   brand isn't possible — ask again if that happens.
 3. Per image, run (Bash, repo root):
    ```sh
    node scripts/add-product.mjs --file "inbox/<file>" --name "<Name>" \
@@ -52,8 +58,17 @@ automatically; the user adds the marketplace URL later.
    (Always pass `--publish`; leave it off only when the user asks for a
    draft this time. The release date is taken from the poster file's modified time
    automatically; pass `--date <ISO>` only to override it.)
-4. Move processed images to `inbox/done/` so a re-run can't duplicate them.
-5. Report a table: image → product name, category, merk, compat, draft/published.
+4. If the user picked featured products, run ONCE with all their new ids
+   (from the `product #<id>` lines of step 3):
+   ```sh
+   node scripts/feature-products.mjs --ids <id1>,<id2>
+   ```
+   It features the picks and un-features the oldest (by publicatiedatum)
+   so each brand keeps 3. Add `--dry` to preview without changing anything.
+5. Move processed images to `inbox/done/` so a re-run can't duplicate them.
+6. Report a table: image → product name, category, merk, compat, featured,
+   draft/published — plus which old products left the spotlight (from the
+   feature-products output).
    Remind the user to add the **marketplace URL** in Directus once the
    product is on the MP — unless the products debut at an event: then
    they're event-exclusive (not in store or on the MP yet), so the URL waits
@@ -63,8 +78,8 @@ automatically; the user adds the marketplace URL later.
 ## Auth & plumbing
 
 - The script reads `DIRECTUS_URL` + `DIRECTUS_CONTENT_TOKEN` from the repo
-  `.env` (content-bot user, create/read on producten/categorieen/galerij/files
-  only). If the token is missing, regenerate via `deploy/cms/build-schema.mjs`
+  `.env` (content-bot user, create/read on producten/categorieen/galerij/files,
+  plus update on `producten.is_featured` only). If the token is missing, regenerate via `deploy/cms/build-schema.mjs`
   with `CONTENT_TOKEN` set (see deploy/cms/README.md pattern).
 - Slug uniqueness and category matching/creation are handled by the script —
   don't pre-check those by hand.

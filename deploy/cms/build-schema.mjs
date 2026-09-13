@@ -624,6 +624,9 @@ async function buildTicketAccess() {
       await ensurePermission(contentPolicyId, { collection, action, fields: ['*'] });
     }
   }
+  // Featured rotation (scripts/feature-products.mjs): the bot may flip
+  // is_featured on existing products and nothing else about them.
+  await ensurePermission(contentPolicyId, { collection: 'producten', action: 'update', fields: ['is_featured'] });
 
   // -- notice bot: used by deploy/notifier to send SL group notices ----------
   // Reads updates (to build the notice) and writes back only the two send-log
