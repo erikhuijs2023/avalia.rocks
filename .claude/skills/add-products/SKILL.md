@@ -7,9 +7,10 @@ description: Process product poster images from inbox/ into Directus products. U
 
 The user drops product poster images (portrait 1536×2048) in `inbox/`.
 For each image: read it, extract product data from the artwork, then create
-the product in Directus via `scripts/add-product.mjs`. Products are created
-as **draft** — the user reviews in Directus, adds the marketplace URL, and
-publishes (publishing triggers the site rebuild automatically).
+the product in Directus via `scripts/add-product.mjs`. Products are
+**published directly** (the user's choice: extraction is reliable, and any
+slip is fixed afterwards in Directus). Publishing triggers the site rebuild
+automatically; the user adds the marketplace URL later.
 
 ## Procedure
 
@@ -46,17 +47,18 @@ publishes (publishing triggers the site rebuild automatically).
    node scripts/add-product.mjs --file "inbox/<file>" --name "<Name>" \
      --category "<Category>" --merk <avas-lewd|hdm> \
      --short "<teaser>" --desc "<html>" \
-     --features "<f1>|<f2>" --compat "<c1>,<c2>"
+     --features "<f1>|<f2>" --compat "<c1>,<c2>" --publish
    ```
-   (`--publish` only when the user explicitly asked to publish directly.
-   The release date is taken from the poster file's modified time
+   (Always pass `--publish`; leave it off only when the user asks for a
+   draft this time. The release date is taken from the poster file's modified time
    automatically; pass `--date <ISO>` only to override it.)
 4. Move processed images to `inbox/done/` so a re-run can't duplicate them.
 5. Report a table: image → product name, category, merk, compat, draft/published.
-   Remind the user: add the **marketplace URL** in Directus and flip status to
-   Published — unless the products debut at an event: then they're event-
-   exclusive (not in store or on the MP yet), so publish without a
-   marketplace URL and add it only after the event ends. Mention any category the script CREATED (check its output).
+   Remind the user to add the **marketplace URL** in Directus once the
+   product is on the MP — unless the products debut at an event: then
+   they're event-exclusive (not in store or on the MP yet), so the URL waits
+   until the event ends. Mention any category the script CREATED (check its
+   output).
 
 ## Auth & plumbing
 
