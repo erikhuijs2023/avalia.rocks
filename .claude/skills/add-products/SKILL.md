@@ -54,7 +54,9 @@ publishes (publishing triggers the site rebuild automatically).
 4. Move processed images to `inbox/done/` so a re-run can't duplicate them.
 5. Report a table: image → product name, category, merk, compat, draft/published.
    Remind the user: add the **marketplace URL** in Directus and flip status to
-   Published. Mention any category the script CREATED (check its output).
+   Published — unless the products debut at an event: then they're event-
+   exclusive (not in store or on the MP yet), so publish without a
+   marketplace URL and add it only after the event ends. Mention any category the script CREATED (check its output).
 
 ## Auth & plumbing
 

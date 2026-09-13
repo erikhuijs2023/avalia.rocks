@@ -37,7 +37,11 @@ notice is a separate manual button, see deploy/notifier/README.md).
 
 3. **Write the copy** — English, brand voice (premium & provocative, warm,
    no explicit language), matching earlier posts (read a recent one via the
-   context output's `last_post` for tone):
+   context output's `last_post` for tone).
+   **Event exclusivity:** a product debuting at an event is sold ONLY there
+   for the event's run — not in the store, not on the Marketplace. So never
+   point to the store or MP for the featured products; the event is the one
+   place to get them (it's fine to say they're exclusive to the event).
    - **title** — short, e.g. "Ava's Lewd at <Event>" or
      "New drops at <Event> — from <Sat 19 Sep>". ASCII-friendly (the SL
      notice subject is ASCII-folded and capped at 63 chars).
@@ -73,9 +77,9 @@ notice is a separate manual button, see deploy/notifier/README.md).
    draft/published, and show the excerpt + notice text so the user can judge
    them without opening Directus. Remind the user:
    - review + publish in Directus (Content → Updates);
-   - featured products that are still **draft** or lack a
-     `marketplace_url` (see context output) should be published too, or their
-     links on the post will 404;
+   - featured products that are still **draft** (see context output) must be
+     published too, or their links on the post will 404 — but they stay
+     **without** `marketplace_url` until the event ends (event exclusivity);
    - the group notice is sent separately via the Directus flow button
      (preview with "Preview notice" first).
 
